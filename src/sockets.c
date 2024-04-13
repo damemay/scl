@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-int secl_send(int fd, const void* buf, const uint32_t size) {
+int scl_send(int fd, const void* buf, const uint32_t size) {
     size_t total = 0, left = size, ret = 0;
     while(total < size) {
         ret = send(fd, buf+total, left, 0);
@@ -15,7 +15,7 @@ int secl_send(int fd, const void* buf, const uint32_t size) {
     return total;
 }
 
-int secl_recv(int fd, void* buf, const uint32_t size) {
+int scl_recv(int fd, void* buf, const uint32_t size) {
     size_t total = 0, left = size, ret = 0;
     while(total < size) {
         ret = recv(fd, buf+total, left, 0);
@@ -53,7 +53,7 @@ static struct addrinfo* init_addrinfo(const char* host, const char* port, const 
     return info;
 }
 
-static int bind_server(secl_server* server) {
+static int bind_server(scl_server* server) {
     if(!server) return -1;
     struct addrinfo hints = {
         .ai_family      = AF_UNSPEC,
@@ -62,7 +62,7 @@ static int bind_server(secl_server* server) {
     };
     struct addrinfo* info = init_addrinfo(NULL, server->port, &hints);
     inet_ntop(info->ai_family, get_in_addr(info->ai_addr), server->ip, sizeof(server->ip));
-    secl_vlog("starting server with address: %s:%s", server->ip, server->port);
+    scl_vlog("starting server with address: %s:%s", server->ip, server->port);
     int opt = 1;
     for(server->sai = info; server->sai != NULL; server->sai = server->sai->ai_next) {
         if((server->fd = socket(info->ai_family, info->ai_socktype, info->ai_protocol)) == -1) 
@@ -79,21 +79,21 @@ static int bind_server(secl_server* server) {
     return 0;
 }
 
-int secl_server_init(secl_server* server) {
+int scl_server_init(scl_server* server) {
     int res = bind_server(server);
     if(res == -1) return -1;
     if(listen(server->fd, 10) == -1) return -1;
     if(kill_dead() == -1) return -1;
-    secl_log("server awaiting connections...");
+    scl_log("server awaiting connections...");
     return 0;
 }
 
-int secl_server_accept(secl_server* server, void (*func)(int)) {
+int scl_server_accept(scl_server* server, void (*func)(int)) {
     socklen_t ra_len = sizeof(server->ra);
     if((server->rfd = accept(server->fd, (struct sockaddr*)&server->ra, &ra_len)) == -1)
         return -1;
     inet_ntop(server->ra.ss_family, get_in_addr((struct sockaddr*)&server->ra), server->rip, sizeof(server->rip));
-    secl_vlog("server connected with ip: %s", server->rip);
+    scl_vlog("server connected with ip: %s", server->rip);
     if(!fork()) {
         int rfd = server->rfd;
         if(func) func(rfd);
@@ -102,11 +102,11 @@ int secl_server_accept(secl_server* server, void (*func)(int)) {
     return 0;
 }
 
-void secl_server_clean(secl_server* server) {
+void scl_server_clean(scl_server* server) {
     freeaddrinfo(server->sai);
 }
 
-static int connect_client(secl_client* client) {
+static int connect_client(scl_client* client) {
     if(!client) return -1;
     struct addrinfo hints = {
         .ai_family      = AF_UNSPEC,
@@ -126,14 +126,14 @@ static int connect_client(secl_client* client) {
     return 0;
 }
 
-int secl_client_init(secl_client* client) {
+int scl_client_init(scl_client* client) {
     int res = connect_client(client);
     if(res == -1) return -1;
     char rip[INET6_ADDRSTRLEN];
-    secl_vlog("client connected to address %s:%s", rip, client->port);
+    scl_vlog("client connected to address %s:%s", rip, client->port);
     return 0;
 }
 
-void secl_client_clean(secl_client* client) {
+void scl_client_clean(scl_client* client) {
     freeaddrinfo(client->ai);
 }

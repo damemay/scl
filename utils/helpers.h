@@ -1,16 +1,16 @@
-#ifndef __SECL_HELPERS_H__
-#define __SECL_HELPERS_H__
+#ifndef __SCL_HELPERS_H__
+#define __SCL_HELPERS_H__
 
 #ifndef NDEBUG
-#define secl_verr(FMT, ...)  fprintf(stderr, "secl:err:" FMT "!\n", __VA_ARGS__)
-#define secl_err(MSG)        fprintf(stderr, "secl:err:" MSG "!\n")
-#define secl_vlog(FMT, ...)  printf("secl:log:" FMT "\n", __VA_ARGS__)
-#define secl_log(MSG)        printf("secl:log:" MSG "\n")
+#define scl_verr(FMT, ...)  fprintf(stderr, "scl:err:" FMT "!\n", __VA_ARGS__)
+#define scl_err(MSG)        fprintf(stderr, "scl:err:" MSG "!\n")
+#define scl_vlog(FMT, ...)  printf("scl:log:" FMT "\n", __VA_ARGS__)
+#define scl_log(MSG)        printf("scl:log:" MSG "\n")
 #else
-#define secl_verr(FMT, ...)  do{}while(0)
-#define secl_err(MSG)        do{}while(0)
-#define secl_vlog(FMT, ...)  do{}while(0)
-#define secl_log(MSG)        do{}while(0)
+#define scl_verr(FMT, ...)  do{}while(0)
+#define scl_err(MSG)        do{}while(0)
+#define scl_vlog(FMT, ...)  do{}while(0)
+#define scl_log(MSG)        do{}while(0)
 #endif
 
 #endif

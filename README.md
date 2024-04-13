@@ -1,4 +1,4 @@
-# small educational c library
+# small c library
 
 ## goals
 - be small (in code and size)
