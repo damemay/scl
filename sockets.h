@@ -1,6 +1,5 @@
 #ifndef __SECL_SOCKETS_H__
 #define __SECL_SOCKETS_H__
-#include "helpers.h"
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
