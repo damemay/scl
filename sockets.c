@@ -37,7 +37,7 @@ static int kill_dead() {
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;
     if(sigaction(SIGCHLD, &sa, NULL) == -1) return -1;
-    return 1;
+    return 0;
 }
 
 static void* get_in_addr(struct sockaddr* sa) {
@@ -75,7 +75,7 @@ static int bind_server(secl_server* server) {
     break;
     }
     freeaddrinfo(info);
-    return 1;
+    return 0;
 }
 
 int secl_server_init(secl_server* server) {
@@ -84,7 +84,7 @@ int secl_server_init(secl_server* server) {
     if(listen(server->fd, 10) == -1) return -1;
     if(kill_dead() == -1) return -1;
     secl_log("server awaiting connections...");
-    return 1;
+    return 0;
 }
 
 int secl_server_accept(secl_server* server, void (*func)(int)) {
@@ -98,7 +98,7 @@ int secl_server_accept(secl_server* server, void (*func)(int)) {
         if(func) func(rfd);
     }
     close(server->rfd);
-    return 1;
+    return 0;
 }
 
 void secl_server_clean(secl_server* server) {
@@ -122,7 +122,7 @@ static int connect_client(secl_client* client) {
         break;
     }
     freeaddrinfo(info);
-    return 1;
+    return 0;
 }
 
 int secl_client_init(secl_client* client) {
@@ -130,7 +130,7 @@ int secl_client_init(secl_client* client) {
     if(res == -1) return -1;
     char rip[INET6_ADDRSTRLEN];
     secl_vlog("client connected to address %s:%s", rip, client->port);
-    return 1;
+    return 0;
 }
 
 void secl_client_clean(secl_client* client) {
