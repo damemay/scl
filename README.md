@@ -1,1 +1,1 @@
-# tinyclients
+# small educational c library
