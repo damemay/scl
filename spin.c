@@ -31,7 +31,7 @@ void secl_spin_cancel(secl_spin* spin) {
     fprintf(stdout, "\b \r");
 }
 
-int cspin_restart(secl_spin* spin, const char* msg) {
+int secl_spin_restart(secl_spin* spin, const char* msg) {
     if(msg) spin->msg = msg;
     if(pthread_create(&spin->thread, NULL, work, spin)) return -1;
     return 0;
