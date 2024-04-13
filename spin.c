@@ -1,4 +1,4 @@
-#include "cspin.h"
+#include "spin.h"
 
 static inline void* work(void* arg) {
     secl_spin* t = (secl_spin*)arg;
