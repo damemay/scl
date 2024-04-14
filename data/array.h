@@ -42,10 +42,14 @@ typedef struct scl_array {
     ret; \
 })
 
-#define SCL_ARRAY_GET(ARRAY, TYPE, INDEX) ({ \
-    TYPE* data = (TYPE*)ARRAY->data; \
-    if(INDEX >= ARRAY->size || INDEX < 0) -1; \
-    data[INDEX]; \
+#define SCL_ARRAY_GET(ARRAY, TYPE, INDEX, ELEMENT) ({ \
+    int ret = 0; \
+    if(INDEX >= ARRAY->size || INDEX < 0) ret = -1; \
+    else { \
+	TYPE* data = (TYPE*)ARRAY->data; \
+	ELEMENT = data[INDEX]; \
+    } \
+    ret; \
 })
 
 #define SCL_ARRAY_DEL(ARRAY, TYPE, INDEX) ({ \
