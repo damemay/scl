@@ -26,12 +26,14 @@ int main(int argc, char** argv) {
     alog(list);
     res = SCL_ARRAY_ADD(list, int, 5);
     assert(res == 0);
-    res = SCL_ARRAY_ADD(list, int, 10);
+    res = SCL_ARRAY_ADD(list, int, 5);
     assert(res == 0);
-    res = SCL_ARRAY_ADD(list, int, 15);
+    alog(list);
+    res = SCL_ARRAY_DEL(list, int, 2);
     assert(res == 0);
-    res = SCL_ARRAY_ADD(list, int, 20);
+    res = SCL_ARRAY_DEL(list, int, 3);
     assert(res == 0);
     alog(list);
     scl_array_free(list);
+    free(list);
 }

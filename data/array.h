@@ -41,7 +41,6 @@ typedef struct scl_array {
     if(INDEX >= ARRAY->size || INDEX < 0) -1; \
     TYPE* data = (TYPE*)ARRAY->data; \
     data[INDEX]; \
-    0; \
 })
 
 #define SCL_ARRAY_DEL(ARRAY, TYPE, INDEX) ({ \
