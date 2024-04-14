@@ -53,3 +53,4 @@ dkms.conf
 main.c
 bin/
 build/
+tests/
