@@ -15,7 +15,7 @@ source: $(OBJECTS)
 	mv src/*.o build/
 
 test: $(EXECUTABLES)
-	mv $< build/
+	find tests/ -type f | grep -v "\.c" | xargs -I@ mv @ build/
 
 clean:
 	rm build/*
