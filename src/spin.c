@@ -1,4 +1,4 @@
-#include "../spin.h"
+#include "../print/spin.h"
 
 static inline void* work(void* arg) {
     scl_spin* t = (scl_spin*)arg;
