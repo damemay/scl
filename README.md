@@ -10,9 +10,13 @@
 
 ### net
 
-- [sockets.h](net/sockets.h)
+- [sockets.h](net/sockets.h) - send and recv wrappers, client and server boilerplate
 
 ### print
 
-- [color.h](print/color.h)
-- [spin.h](print/spin.h)
+- [color.h](print/color.h) - ansi colors macros
+- [spin.h](print/spin.h) - progress spinner
+
+### data
+
+- [array.h](data/array.h) - dynamic array
