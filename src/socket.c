@@ -134,6 +134,6 @@ int scl_client_init(scl_client* client) {
     return 0;
 }
 
-void scl_client_clean(scl_client* client) {
+void scl_client_free(scl_client* client) {
     freeaddrinfo(client->ai);
 }
