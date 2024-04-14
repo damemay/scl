@@ -11,6 +11,6 @@ int main(int argc, char** argv) {
     assert(res == 0);
     char buffer[10];
     scl_recv(client.fd, buffer, 7);
-    scl_vlog("%s", buffer);
+    SCL_VLOG("%s", buffer);
     return 0;
 }

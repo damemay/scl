@@ -62,7 +62,7 @@ static int bind_server(scl_server* server) {
     };
     struct addrinfo* info = init_addrinfo(NULL, server->port, &hints);
     inet_ntop(info->ai_family, get_in_addr(info->ai_addr), server->ip, sizeof(server->ip));
-    scl_vlog("starting server with address: %s:%s", server->ip, server->port);
+    SCL_VLOG("starting server with address: %s:%s", server->ip, server->port);
     int opt = 1;
     for(server->sai = info; server->sai != NULL; server->sai = server->sai->ai_next) {
         if((server->fd = socket(info->ai_family, info->ai_socktype, info->ai_protocol)) == -1) 
@@ -84,7 +84,7 @@ int scl_server_init(scl_server* server) {
     if(res == -1) return -1;
     if(listen(server->fd, 10) == -1) return -1;
     if(kill_dead() == -1) return -1;
-    scl_log("server awaiting connections...");
+    SCL_LOG("server awaiting connections...");
     return 0;
 }
 
@@ -93,7 +93,7 @@ int scl_server_accept(scl_server* server, void (*func)(int)) {
     if((server->rfd = accept(server->fd, (struct sockaddr*)&server->ra, &ra_len)) == -1)
         return -1;
     inet_ntop(server->ra.ss_family, get_in_addr((struct sockaddr*)&server->ra), server->rip, sizeof(server->rip));
-    scl_vlog("server connected with ip: %s", server->rip);
+    SCL_VLOG("server connected with ip: %s", server->rip);
     if(!fork()) {
         int rfd = server->rfd;
         if(func) func(rfd);
@@ -130,6 +130,6 @@ int scl_client_init(scl_client* client) {
     int res = connect_client(client);
     if(res == -1) return -1;
     char rip[INET6_ADDRSTRLEN];
-    scl_vlog("client connected to address %s:%s", rip, client->port);
+    SCL_VLOG("client connected to address %s:%s", rip, client->port);
     return 0;
 }
