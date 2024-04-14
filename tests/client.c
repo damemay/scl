@@ -1,4 +1,5 @@
 #include "../net/socket.h"
+#include "../utils/helpers.h"
 #include <assert.h>
 
 int main(int argc, char** argv) {
@@ -10,6 +11,6 @@ int main(int argc, char** argv) {
     assert(res == 0);
     char buffer[10];
     scl_recv(client.fd, buffer, 7);
-    scl_client_free(&client);
+    scl_vlog("%s", buffer);
     return 0;
 }

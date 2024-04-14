@@ -38,5 +38,4 @@ typedef struct scl_client {
 } scl_client;
 
 int scl_client_init(scl_client* client);
-void scl_client_free(scl_client* client);
 #endif

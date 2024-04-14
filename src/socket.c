@@ -133,7 +133,3 @@ int scl_client_init(scl_client* client) {
     scl_vlog("client connected to address %s:%s", rip, client->port);
     return 0;
 }
-
-void scl_client_free(scl_client* client) {
-    freeaddrinfo(client->ai);
-}
