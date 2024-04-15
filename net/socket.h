@@ -12,8 +12,8 @@
 #include <netdb.h>
 #include <signal.h>
 
-int scl_send(int fd, const void* buf, const uint32_t size);
-int scl_recv(int fd, void* buf, const uint32_t size);
+int scl_send(int fd, const void* buf, const uint64_t size);
+int scl_recv(int fd, void* buf, const uint64_t size);
 
 typedef struct scl_socket_server {
     const char* port;

@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-int scl_send(int fd, const void* buf, const uint32_t size) {
+int scl_send(int fd, const void* buf, const uint64_t size) {
     size_t total = 0, left = size, ret = 0;
     while(total < size) {
         ret = send(fd, buf+total, left, 0);
@@ -15,7 +15,7 @@ int scl_send(int fd, const void* buf, const uint32_t size) {
     return total;
 }
 
-int scl_recv(int fd, void* buf, const uint32_t size) {
+int scl_recv(int fd, void* buf, const uint64_t size) {
     size_t total = 0, left = size, ret = 0;
     while(total < size) {
         ret = recv(fd, buf+total, left, 0);
@@ -117,10 +117,13 @@ static int connect_client(scl_socket_client* client) {
             continue;
         if(connect(client->fd, info->ai_addr, info->ai_addrlen) == -1) {
             close(client->fd);
-            continue;
+            return -1;
         }
         break;
     }
+    char rip[INET6_ADDRSTRLEN];
+    inet_ntop(info->ai_addr->sa_family, get_in_addr(info->ai_addr), rip, sizeof(rip));
+    SCL_VLOG("client connected to %s:%s", rip, client->port);
     freeaddrinfo(info);
     return 0;
 }
