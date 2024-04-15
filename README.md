@@ -19,3 +19,4 @@
 ### data
 
 - [array.h](data/array.h) - dynamic array
+- [map.h](data/map.h) - array map based on dynamic arrays
