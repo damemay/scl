@@ -80,8 +80,7 @@ static int bind_server(scl_socket_server* server) {
 }
 
 int scl_socket_server_init(scl_socket_server* server) {
-    int res = bind_server(server);
-    if(res == -1) return -1;
+    if(bind_server(server) == -1) return -1;
     if(listen(server->fd, 10) == -1) return -1;
     if(kill_dead() == -1) return -1;
     SCL_LOG("server awaiting connections...");
@@ -127,8 +126,7 @@ static int connect_client(scl_socket_client* client) {
 }
 
 int scl_socket_client_init(scl_socket_client* client) {
-    int res = connect_client(client);
-    if(res == -1) return -1;
+    if(connect_client(client) == -1) return -1;
     char rip[INET6_ADDRSTRLEN];
     SCL_VLOG("client connected to address %s:%s", rip, client->port);
     return 0;
