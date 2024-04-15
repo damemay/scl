@@ -8,13 +8,13 @@ void callback(int fd) {
 }
 
 int main(int argc, char** argv) {
-    scl_server server = { .port = "5000" };
-    int res = scl_server_init(&server);
+    scl_socket_server server = { .port = "5000" };
+    int res = scl_socket_server_init(&server);
     assert(res == 0);
     while(1) {
-	res = scl_server_accept(&server, callback);
+	res = scl_socket_server_accept(&server, callback);
 	assert(res == 0);
     }
-    scl_server_free(&server);
+    scl_socket_server_free(&server);
     return 0;
 }

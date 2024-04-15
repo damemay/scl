@@ -79,7 +79,7 @@ static int bind_server(scl_socket_server* server) {
     return 0;
 }
 
-int scl_server_init(scl_socket_server* server) {
+int scl_socket_server_init(scl_socket_server* server) {
     int res = bind_server(server);
     if(res == -1) return -1;
     if(listen(server->fd, 10) == -1) return -1;
@@ -88,7 +88,7 @@ int scl_server_init(scl_socket_server* server) {
     return 0;
 }
 
-int scl_server_accept(scl_socket_server* server, void (*func)(int)) {
+int scl_socket_server_accept(scl_socket_server* server, void (*func)(int)) {
     socklen_t ra_len = sizeof(server->ra);
     if((server->rfd = accept(server->fd, (struct sockaddr*)&server->ra, &ra_len)) == -1)
         return -1;
@@ -102,7 +102,7 @@ int scl_server_accept(scl_socket_server* server, void (*func)(int)) {
     return 0;
 }
 
-void scl_server_clean(scl_socket_server* server) {
+void scl_socket_server_clean(scl_socket_server* server) {
     freeaddrinfo(server->sai);
 }
 
@@ -126,7 +126,7 @@ static int connect_client(scl_socket_client* client) {
     return 0;
 }
 
-int scl_client_init(scl_socket_client* client) {
+int scl_socket_client_init(scl_socket_client* client) {
     int res = connect_client(client);
     if(res == -1) return -1;
     char rip[INET6_ADDRSTRLEN];
