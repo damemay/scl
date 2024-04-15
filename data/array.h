@@ -62,8 +62,8 @@ typedef struct scl_array {
 	ARRAY->size -= 1; \
     } \
     if(ARRAY->size < ARRAY->capacity-ARRAY->step) { \
-	if(SCL_ARRAY_REALLOC(ARRAY, TYPE, ARRAY->capacity-ARRAY->step) == -1) ret = -1; \
-	else ARRAY->capacity -= ARRAY->step; \
+	if(SCL_ARRAY_REALLOC(ARRAY, TYPE, ARRAY->capacity-ARRAY->step) == 0) \
+	    ARRAY->capacity -= ARRAY->step; \
     } \
     ret; \
 })
