@@ -127,7 +127,5 @@ static int connect_client(scl_socket_client* client) {
 
 int scl_socket_client_init(scl_socket_client* client) {
     if(connect_client(client) == -1) return -1;
-    char rip[INET6_ADDRSTRLEN];
-    SCL_VLOG("client connected to address %s:%s", rip, client->port);
     return 0;
 }
