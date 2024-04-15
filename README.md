@@ -9,7 +9,7 @@
 
 ### net
 
-- [sockets.h](net/sockets.h) - send and recv wrappers, client and server boilerplate
+- [socket.h](net/socket.h) - send and recv wrappers, client and server boilerplate
 
 ### print
 
