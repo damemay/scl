@@ -8,7 +8,7 @@ static void scl_mitem_free(scl_mitem* item) {
     free(item);
 }
 
-scl_map* scl_map_init(uint32_t capacity) {
+scl_map* scl_map_create(uint32_t capacity) {
     scl_map* map = malloc(sizeof(scl_map));
     if(!map) return NULL;
     if(SCL_ARRAY_INIT(map, scl_mitem*, capacity) == -1) {

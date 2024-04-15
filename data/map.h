@@ -9,7 +9,7 @@ typedef struct scl_mitem {
 
 typedef scl_array scl_map;
 
-scl_map* scl_map_init(uint32_t initial_capacity);
+scl_map* scl_map_create(uint32_t initial_capacity);
 int scl_map_add(scl_map* map, const char* key, const void* value, size_t size);
 int scl_map_del(scl_map* map, const char* key);
 void* scl_map_get(scl_map* map, const char* key);
