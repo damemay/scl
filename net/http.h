@@ -3,13 +3,17 @@
 #include "socket.h"
 #include "../data/map.h"
 
+#define SCL_HTTP_USER_AGENT	    "scl-http-request"
 #define SCL_HTTP_NEWLINE	    "\r\n"
-#define SCL_HTTP_BREAK	    	    "\r\n\r\n"
+#define SCL_HTTP_TERMINATOR	    "\r\n\r\n"
+#define SCL_HTTP_CHUNK_TERMINATOR   "0\r\n\r\n"
 #define SCL_HTTP_URL_PREFIX_HTTP    "http://"
 #define SCL_HTTP_URL_PREFIX_HTTPS   "https://"
 #define SCL_HTTP_PORT_SIZE_LIMIT    32
 #define SCL_HTTP_NAME_SIZE_LIMIT    1024
-#define SCL_HTTP_QUERY_SIZE_LIMIT   4096
+#define SCL_HTTP_QUERY_SIZE_LIMIT   1024
+#define SCL_HTTP_METHOD_SIZE_LIMIT  5
+#define SCL_HTTP_MESSAGE_SIZE_LIMIT 5120
 
 typedef enum scl_http_request_method {
     scl_http_request_get,
@@ -23,6 +27,7 @@ typedef struct scl_http_request {
     int timeout;
     int follow_redirects;
     void* data;
+    size_t data_size;
     char* basic_auth[2];
     scl_map* headers;
     scl_map* params;
