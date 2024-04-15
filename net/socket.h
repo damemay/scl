@@ -15,7 +15,7 @@
 int scl_send(int fd, const void* buf, const uint32_t size);
 int scl_recv(int fd, void* buf, const uint32_t size);
 
-typedef struct scl_server {
+typedef struct scl_socket_server {
     const char* port;
     struct addrinfo* sai;
     int fd;
@@ -24,18 +24,18 @@ typedef struct scl_server {
     struct sockaddr_storage ra;
     int rfd;
     char rip[INET6_ADDRSTRLEN];
-} scl_server;
+} scl_socket_server;
 
-int scl_server_init(scl_server* server);
-int scl_server_accept(scl_server* server, void (*func)(int));
-void scl_server_free(scl_server* server);
+int scl_socket_server_init(scl_socket_server* server);
+int scl_socket_server_accept(scl_socket_server* server, void (*func)(int));
+void scl_socket_server_free(scl_socket_server* server);
 
-typedef struct scl_client {
+typedef struct scl_socket_client {
     const char* host;
     const char* port;
     struct addrinfo* ai;
     int fd;
-} scl_client;
+} scl_socket_client;
 
-int scl_client_init(scl_client* client);
+int scl_socket_client_init(scl_socket_client* client);
 #endif
