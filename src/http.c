@@ -3,6 +3,8 @@
 #include "../utils/helpers.h"
 #include <string.h>
 #include <ctype.h>
+#include <poll.h>
+#include <fcntl.h>
 
 static int init_request(scl_http_request* request) {
     if(!request->url) return -1;
@@ -77,14 +79,12 @@ static void parse_method(scl_http_request_method method, char* str) {
     }
 }
 
-static int read_until_terminator(int fd, char* response, char* terminator) {
-    size_t offset = 0;
-    while(!strstr(response, terminator)) {
-	if(scl_recv(fd, response+offset, 16) <= 0) return -1;
-	offset += 16;
-    }
-    response[offset] = '\0';
-    return 0;
+static int poll_event(int fd, int timeout, short event) {
+    struct pollfd pfd[1];
+    pfd[0].fd = fd;
+    pfd[0].events = event;
+    if(poll(pfd, 1, timeout*1000) == 0) return -1;
+    return pfd[0].revents & event;
 }
 
 static int send_request(scl_http_request* r, int fd, char* host, char* query) {
@@ -107,21 +107,36 @@ static int send_request(scl_http_request* r, int fd, char* host, char* query) {
     if(r->method != scl_http_request_head && r->data) {}
     res += sprintf(buffer, SCL_HTTP_NEWLINE);
     size += res, buffer += res;
-    SCL_VLOG("\n%s", message);
+    if(!poll_event(fd, r->timeout, POLLOUT)) return -1;
     if(scl_send(fd, message, size) <= 0) return -1;
+    SCL_VLOG("\n%s", message);
     return 0;
 }
 
-static int read_response(scl_http_response* r, int fd) {
+static int recv_terminator(int fd, char* buffer, char* terminator, int timeout) {
+    size_t b_off = 0;
+    uint16_t off = SCL_HTTP_QUERY_SIZE_LIMIT;
+    fcntl(fd, F_SETFL, O_NONBLOCK);
+    do {
+	if(poll_event(fd, timeout, POLLIN)) {
+	    int r = scl_recv(fd, buffer+b_off, off);
+	    b_off += off;
+	}
+    } while(!strstr(buffer, terminator));
+    buffer[b_off] = '\0';
+    return 0;
+}
+
+static int read_response(scl_http_response* r, int fd, int timeout) {
     char response[SCL_HTTP_MESSAGE_SIZE_LIMIT];
-    if(read_until_terminator(fd, response, SCL_HTTP_TERMINATOR) == -1) return -1;
+    if(recv_terminator(fd, response, SCL_HTTP_TERMINATOR, timeout) == -1) return -1;
     SCL_VLOG("\n%s", response);
     return 0;
 }
 
 static int perform(scl_http_request* request, scl_http_response* response, int fd, char* host, char* query) {
     if(send_request(request, fd, host, query) == -1) return -1;
-    if(read_response(response, fd) == -1) return -1;
+    if(read_response(response, fd, request->timeout) == -1) return -1;
     return 0;
 }
 
