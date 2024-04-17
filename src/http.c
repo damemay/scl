@@ -77,9 +77,9 @@ static void parse_method(scl_http_request_method method, char* str) {
     }
 }
 
-static int read_until_terminator(int fd, char* response) {
+static int read_until_terminator(int fd, char* response, char* terminator) {
     size_t offset = 0;
-    while(!strstr(response, SCL_HTTP_TERMINATOR)) {
+    while(!strstr(response, terminator)) {
 	if(scl_recv(fd, response+offset, 16) <= 0) return -1;
 	offset += 16;
     }
@@ -87,7 +87,7 @@ static int read_until_terminator(int fd, char* response) {
     return 0;
 }
 
-static int perform(scl_http_request* r, int fd, char* host, char* query) {
+static int send_request(scl_http_request* r, int fd, char* host, char* query) {
     size_t reserved_size = SCL_HTTP_MESSAGE_SIZE_LIMIT;
     if(r->headers) reserved_size += sizeof(r->headers->data);
     if(r->data) reserved_size += r->data_size;
@@ -109,14 +109,24 @@ static int perform(scl_http_request* r, int fd, char* host, char* query) {
     size += res, buffer += res;
     SCL_VLOG("\n%s", message);
     if(scl_send(fd, message, size) <= 0) return -1;
+    return 0;
+}
+
+static int read_response(scl_http_response* r, int fd) {
     char response[SCL_HTTP_MESSAGE_SIZE_LIMIT];
-    if(read_until_terminator(fd, response) == -1) return -1;
+    if(read_until_terminator(fd, response, SCL_HTTP_TERMINATOR) == -1) return -1;
     SCL_VLOG("\n%s", response);
     return 0;
 }
 
-scl_http_response* scl_http_request_perform(scl_http_request* request) {
-    if(init_request(request) == -1) return NULL;
+static int perform(scl_http_request* request, scl_http_response* response, int fd, char* host, char* query) {
+    if(send_request(request, fd, host, query) == -1) return -1;
+    if(read_response(response, fd) == -1) return -1;
+    return 0;
+}
+
+int scl_http_request_perform(scl_http_request* request, scl_http_response* response) {
+    if(init_request(request) == -1) return -1;
     char hostname[SCL_HTTP_NAME_SIZE_LIMIT];
     char ip[SCL_HTTP_NAME_SIZE_LIMIT];
     char port[SCL_HTTP_PORT_SIZE_LIMIT];
@@ -127,9 +137,9 @@ scl_http_response* scl_http_request_perform(scl_http_request* request) {
 	.host = ip,
 	.port = port,
     };
-    if(scl_socket_client_init(&sock) == -1) return NULL;
+    if(scl_socket_client_init(&sock) == -1) return -1;
     if(request->params) {}
-    perform(request, sock.fd, hostname, query);
-    scl_http_response* response = malloc(sizeof(scl_http_response));
-    return response;
+    perform(request, response, sock.fd, hostname, query);
+
+    return 0;
 }

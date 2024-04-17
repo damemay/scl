@@ -41,6 +41,6 @@ typedef struct scl_http_response {
     scl_map* headers;
 } scl_http_response;
 
-scl_http_response* scl_http_request_perform(scl_http_request* request);
+int scl_http_request_perform(scl_http_request* request, scl_http_response* response);
 
 #endif
