@@ -9,13 +9,15 @@ EXECUTABLES := $(patsubst %.c,%,$(wildcard tests/*.c))
 CFLAGS = $(TEST_FLAGS)
 LDFLAGS = $(wildcard build/*.o)
 
-.PHONY: clean
+.PHONY: clean tests
 
 source: $(OBJECTS)
 	mv src/*.o build/
 
 test: $(EXECUTABLES)
 	find tests/ -type f | grep -v "\.c" | xargs -I@ mv @ build/
+
+tests: source test
 
 clean:
 	rm build/*
