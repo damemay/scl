@@ -62,6 +62,12 @@ void* scl_map_get(scl_map* map, const char* key) {
     return NULL;
 }
 
+scl_mitem* scl_map_get_by_index(scl_map* map, uint32_t index) {
+    scl_mitem* item;
+    if(SCL_ARRAY_GET(map, scl_mitem*, index, item) == -1) return NULL;
+    return item;
+}
+
 void scl_map_free(scl_map* map) {
     for(size_t i=0; i<map->size; i++) {
 	scl_mitem* item;
