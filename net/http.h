@@ -35,8 +35,6 @@ typedef struct scl_http_request {
 } scl_http_request;
 
 typedef struct scl_http_response {
-    char* url;
-    char* text;
     void* data;
     int status_code;
     scl_map* headers;
