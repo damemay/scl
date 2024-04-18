@@ -1,6 +1,6 @@
 CC = gcc
 RELEASE_FLAGS = -DNDEBUG -O2
-TEST_FLAGS = 
+TEST_FLAGS = -g
 
 SOURCES = $(wildcard src/*.c)
 OBJECTS := $(patsubst %.c,%.o,$(wildcard src/*.c))
