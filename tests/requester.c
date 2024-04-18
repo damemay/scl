@@ -1,10 +1,15 @@
 #include "../net/http.h"
+#include <string.h>
 
 int main(int argc, char** argv) {
-    if(argc < 2) return 1;
+    if(argc < 3) return 1;
+    scl_http_request_method method;
+    if(strstr(argv[1], "get")) method = scl_http_request_get;
+    else if(strstr(argv[1], "post")) method = scl_http_request_post;
+    else if(strstr(argv[1], "head")) method = scl_http_request_head;
     scl_http_request request = {
-	.url = argv[1],
-	.method = scl_http_request_head,
+	.url = argv[2],
+	.method = method,
     };
     scl_http_response response;
     scl_http_request_perform(&request, &response);
