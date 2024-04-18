@@ -26,6 +26,7 @@ typedef struct scl_http_request {
     char* url;
     int timeout;
     int follow_redirects;
+    int parse_headers;
     void* data;
     size_t data_size;
     char* basic_auth[2];

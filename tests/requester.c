@@ -10,6 +10,7 @@ int main(int argc, char** argv) {
     scl_http_request request = {
 	.url = argv[2],
 	.method = method,
+	.parse_headers = 1,
     };
     scl_http_response response;
     scl_http_request_perform(&request, &response);
