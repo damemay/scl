@@ -15,6 +15,16 @@
 #define SCL_HTTP_METHOD_SIZE_LIMIT  5
 #define SCL_HTTP_MESSAGE_SIZE_LIMIT 5120
 
+typedef enum scl_http_error {
+    scl_http_error_unknown = -1,
+    scl_http_error_bad_url = -2,
+    scl_http_error_getaddrinfo = -3,
+    scl_http_error_polling = -4,
+    scl_http_error_send = -5,
+    scl_http_error_recv = -6,
+    scl_http_error_sock_closed = -7,
+} scl_http_error;
+
 typedef enum scl_http_request_method {
     scl_http_request_get,
     scl_http_request_head,
@@ -40,5 +50,6 @@ typedef struct scl_http_response {
 } scl_http_response;
 
 int scl_http_request_perform(scl_http_request* request, scl_http_response* response);
+void scl_http_error_parse(scl_http_error error, char* buffer, size_t size);
 
 #endif
