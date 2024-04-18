@@ -1,4 +1,4 @@
-CC = gcc
+CC = /usr/local/Cellar/gcc/13.2.0/bin/gcc-13
 RELEASE_FLAGS = -DNDEBUG -O2
 TEST_FLAGS = -g
 
@@ -15,7 +15,6 @@ source: $(OBJECTS)
 	mv src/*.o build/
 
 test: $(EXECUTABLES)
-	find tests/ -type f | grep -v "\.c" | xargs -I@ mv @ build/
 
 tests: source test
 
