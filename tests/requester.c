@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
     if(ret < 0) {
 	char buf[1024];
 	scl_http_error_parse(ret, buf, 1024);
-	puts(buf);
+	printf("%s: %s\n", argv[0], buf);
 	return 1;
     }
     

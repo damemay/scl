@@ -140,10 +140,12 @@ static int send_request(scl_http_request* r, int fd, char* host, char* query) {
 
 static int recv_terminator(int fd, char* buffer, char* terminator, uint16_t off, int timeout) {
     size_t b_off = 0;
+    int recvd = 0;
     fcntl(fd, F_SETFL, O_NONBLOCK);
     do {
 	if(poll_event(fd, timeout, POLLIN)) {
-	    if(scl_recv(fd, buffer+b_off, off)==0) return scl_http_error_sock_closed;
+	    if((recvd = recv(fd, buffer+b_off, off, 0)) == 0) return scl_http_error_sock_closed;
+	    else if(recvd < 0) recvd = off;
 	    b_off += off;
 	}
     } while(!strstr(buffer, terminator));
@@ -156,8 +158,8 @@ static int recv_terminator(int fd, char* buffer, char* terminator, uint16_t off,
 static int add_header(scl_http_response* r, const char* line, size_t len, const char* separator) {
     size_t key_size = separator-line;
     size_t val_size = len-(separator-line);
-    char key[key_size];
-    char val[val_size];
+    char key[key_size+1];
+    char val[val_size+1];
     sprintf(key, "%.*s", (int)key_size, line);
     sprintf(val, "%.*s", (int)val_size, separator+2);
     return scl_map_add(r->headers, key, val, val_size);
@@ -195,11 +197,11 @@ static int parse_headers(scl_http_response* r, char* response) {
 
 static int data_with_content_length(scl_http_response* r, int fd, int timeout, char* size, char* response) {
     long content_length = atoi(size);
+    char* data = strstr(response, SCL_HTTP_TERMINATOR)+4;
     r->data = malloc(content_length+1);
     if(!r->data) return -1;
     r->data_size = content_length+1;
-    char* data = strstr(response, SCL_HTTP_TERMINATOR)+4;
-    strcpy(r->data, data);
+    sprintf(r->data, "%.*s", (int)content_length, data);
     int remaining = content_length - strlen(data);
     if(remaining <= 0) return 0;
     if(poll_event(fd, timeout, POLLIN))
@@ -241,7 +243,7 @@ static int concat_parse(scl_http_response* r, char* response) {
     char* start = strstr(response, SCL_HTTP_TERMINATOR);
     sprintf(r->data, "%s%s", start, (char*)r->data);
     size_t size = strlen(r->data);
-    char* tmp = malloc(size);
+    char* tmp = malloc(r->data_size);
     if(!tmp) return -1;
     char* t = r->data+4, *chunk_end = NULL, *next_t = NULL;
     while(1) {
@@ -259,7 +261,6 @@ static int concat_parse(scl_http_response* r, char* response) {
     }
     free(r->data);
     r->data = tmp;
-    r->data_size = size;
     return 0;
 }
 
@@ -345,6 +346,8 @@ static int inner_perform(scl_http_request* request, scl_http_response* response)
 static void inner_free_response(scl_http_response* response) {
     scl_map_free(response->headers);
     free(response->data);
+    response->headers = NULL;
+    response->data = NULL;
 }
 
 int scl_http_request_perform(scl_http_request* request, scl_http_response* response) {
@@ -354,7 +357,7 @@ int scl_http_request_perform(scl_http_request* request, scl_http_response* respo
 	int ret = 0;
 	do {
 	    if((ret = inner_perform(request, &inner_response)) < 0) return ret;
-	    if(inner_response.status_code >= 300 && inner_response.status_code <= 308) {
+	    if(inner_response.status_code >= 300 && inner_response.status_code <= 308 && inner_response.headers) {
 		char* location = scl_map_get(inner_response.headers, "Location");
 		if(location) {
 		    redirect = 1;
