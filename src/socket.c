@@ -1,5 +1,4 @@
 #include "../net/socket.h"
-#include "../utils/helpers.h"
 #include <netdb.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -62,7 +61,6 @@ static int bind_server(scl_socket_server* server) {
     };
     struct addrinfo* info = init_addrinfo(NULL, server->port, &hints);
     inet_ntop(info->ai_family, get_in_addr(info->ai_addr), server->ip, sizeof(server->ip));
-    SCL_VLOG("starting server with address: %s:%s", server->ip, server->port);
     int opt = 1;
     for(server->sai = info; server->sai != NULL; server->sai = server->sai->ai_next) {
         if((server->fd = socket(info->ai_family, info->ai_socktype, info->ai_protocol)) == -1) 
@@ -83,7 +81,6 @@ int scl_socket_server_init(scl_socket_server* server) {
     if(bind_server(server) == -1) return -1;
     if(listen(server->fd, 10) == -1) return -1;
     if(kill_dead() == -1) return -1;
-    SCL_LOG("server awaiting connections...");
     return 0;
 }
 
@@ -92,7 +89,6 @@ int scl_socket_server_accept(scl_socket_server* server, void (*func)(int)) {
     if((server->rfd = accept(server->fd, (struct sockaddr*)&server->ra, &ra_len)) == -1)
         return -1;
     inet_ntop(server->ra.ss_family, get_in_addr((struct sockaddr*)&server->ra), server->rip, sizeof(server->rip));
-    SCL_VLOG("server connected with ip: %s", server->rip);
     if(!fork()) {
         int rfd = server->rfd;
         if(func) func(rfd);
@@ -123,7 +119,6 @@ static int connect_client(scl_socket_client* client) {
     }
     char rip[INET6_ADDRSTRLEN];
     inet_ntop(info->ai_addr->sa_family, get_in_addr(info->ai_addr), rip, sizeof(rip));
-    SCL_VLOG("client connected to %s:%s", rip, client->port);
     freeaddrinfo(info);
     return 0;
 }
