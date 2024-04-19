@@ -6,9 +6,7 @@ void alog(scl_array* arr) {
     SCL_VLOG("cap:%d size:%d step:%d",
 	    arr->capacity, arr->size, arr->step);
     for(size_t i=0; i<arr->size; i++) {
-	int el;
-	int res = SCL_ARRAY_GET(arr, int, i, el);
-	assert(res==0);
+	int el = SCL_ARRAY_GET(arr, i, int);
 	printf("%d ", el);
     }
     printf("\n");
@@ -16,32 +14,31 @@ void alog(scl_array* arr) {
 
 int main(int argc, char** argv) {
     scl_array* list = malloc(sizeof(scl_array));
-    int res = SCL_ARRAY_INIT(list, int, 5);
+    int res = scl_array_init(list, 5, sizeof(int));
     assert(res == 0);
     alog(list);
-    res = SCL_ARRAY_ADD(list, int, 5);
+    res = SCL_ARRAY_ADD(list, 5, int);
     assert(res == 0);
-    res = SCL_ARRAY_ADD(list, int, 10);
+    res = SCL_ARRAY_ADD(list, 10, int);
     assert(res == 0);
-    res = SCL_ARRAY_ADD(list, int, 15);
+    res = SCL_ARRAY_ADD(list, 15, int);
     assert(res == 0);
-    res = SCL_ARRAY_ADD(list, int, 20);
-    assert(res == 0);
-    alog(list);
-    res = SCL_ARRAY_ADD(list, int, 5);
-    assert(res == 0);
-    res = SCL_ARRAY_ADD(list, int, 5);
+    res = SCL_ARRAY_ADD(list, 20, int);
     assert(res == 0);
     alog(list);
-    res = SCL_ARRAY_DEL(list, int, 2);
+    res = SCL_ARRAY_ADD(list, 2, int);
     assert(res == 0);
-    res = SCL_ARRAY_DEL(list, int, 3);
+    res = SCL_ARRAY_ADD(list, 3, int);
+    assert(res == 0);
+    alog(list);
+    res = SCL_ARRAY_DEL(list, 2, int);
+    assert(res == 0);
+    res = SCL_ARRAY_DEL(list, 3, int);
     if(res == -1) SCL_LOG("element deleted, but not reallocated");
     alog(list);
 
-    int v;
-    res = SCL_ARRAY_GET(list, int, 100, v);
-    if(res == -1) SCL_LOG("wrong index!");
+    int v = SCL_ARRAY_GET(list, 100, int);
+    if(!v) SCL_LOG("wrong index!");
     else SCL_VLOG("%d", v);
 
     scl_array_free(list);

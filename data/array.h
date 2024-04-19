@@ -7,68 +7,47 @@ typedef struct scl_array {
     uint32_t capacity;
     uint32_t size;
     uint32_t step;
+    size_t type_size;
     void* data;
 } scl_array;
 
-#define SCL_ARRAY_INIT(ARRAY, TYPE, CAPACITY) ({ \
-    int __SCL_RETURN_CODE__ = 0; \
-    ARRAY->capacity = CAPACITY; \
-    ARRAY->step = CAPACITY; \
-    ARRAY->size = 0; \
-    ARRAY->data = calloc(ARRAY->capacity, sizeof(TYPE)); \
-    if(!ARRAY->data) __SCL_RETURN_CODE__ = -1; \
-    __SCL_RETURN_CODE__; \
-})
+int scl_array_init(scl_array* array, uint32_t capacity, size_t type_size);
+void scl_array_free(scl_array* array);
+int __scl_array_index_exists(scl_array* array, uint32_t index);
+int __scl_array_can_add(scl_array* array);
+void __scl_array_del_realloc(scl_array* array);
 
-#define SCL_ARRAY_REALLOC(ARRAY, TYPE, CAPACITY) ({ \
-    int __SCL_RETURN_CODE__ = 0; \
-    void* __SCL_DATA__ = realloc(ARRAY->data, CAPACITY*sizeof(TYPE)); \
-    if(!__SCL_DATA__) __SCL_RETURN_CODE__ = -1; \
-    else ARRAY->data = __SCL_DATA__; \
-    __SCL_RETURN_CODE__; \
-})
-
-#define SCL_ARRAY_ADD(ARRAY, TYPE, ELEMENT) ({ \
-    int __SCL_RETURN_CODE__ = 0; \
-    if(ARRAY->size+1 > ARRAY->capacity) { \
-	if(SCL_ARRAY_REALLOC(ARRAY, TYPE, ARRAY->capacity+ARRAY->step) == -1) __SCL_RETURN_CODE__ = -1; \
-	else ARRAY->capacity += ARRAY->step; \
-    } \
-    if(__SCL_RETURN_CODE__ == 0) { \
+#define SCL_ARRAY_ADD(ARRAY, ELEMENT, TYPE) ({ \
+    int __SCL_RETURN_CODE__ = -1; \
+    if(__scl_array_can_add(ARRAY)) { \
 	TYPE* __SCL_DATA__ = (TYPE*)ARRAY->data; \
 	__SCL_DATA__[ARRAY->size++] = ELEMENT; \
 	ARRAY->data = __SCL_DATA__; \
+	__SCL_RETURN_CODE__ = 0; \
     } \
     __SCL_RETURN_CODE__; \
 })
 
-#define SCL_ARRAY_GET(ARRAY, TYPE, INDEX, ELEMENT) ({ \
-    int __SCL_RETURN_CODE__ = 0; \
-    if(INDEX >= ARRAY->size || INDEX < 0) __SCL_RETURN_CODE__ = -1; \
-    else { \
-	TYPE* __SCL_DATA__ = (TYPE*)ARRAY->data; \
-	ELEMENT = __SCL_DATA__[INDEX]; \
-    } \
-    __SCL_RETURN_CODE__; \
-})
-
-#define SCL_ARRAY_DEL(ARRAY, TYPE, INDEX) ({ \
-    int __SCL_RETURN_CODE__ = 0; \
-    if(INDEX >= ARRAY->size || INDEX < 0) __SCL_RETURN_CODE__ = -1; \
-    else { \
+#define SCL_ARRAY_DEL(ARRAY, INDEX, TYPE) ({ \
+    int __SCL_RETURN_CODE__ = -1; \
+    if(__scl_array_index_exists) { \
 	TYPE* __SCL_DATA__ = (TYPE*)ARRAY->data; \
 	for(size_t __SCL_ITERATOR__=INDEX+1; __SCL_ITERATOR__<ARRAY->size; __SCL_ITERATOR__++) \
 	    __SCL_DATA__[__SCL_ITERATOR__-1] = __SCL_DATA__[__SCL_ITERATOR__]; \
 	ARRAY->size -= 1; \
-    } \
-    if(ARRAY->size < ARRAY->capacity-ARRAY->step) { \
-	if(SCL_ARRAY_REALLOC(ARRAY, TYPE, ARRAY->capacity-ARRAY->step) == 0) \
-	    ARRAY->capacity -= ARRAY->step; \
+	__scl_array_del_realloc(ARRAY); \
+	__SCL_RETURN_CODE__ = 0; \
     } \
     __SCL_RETURN_CODE__; \
 })
 
-static inline void scl_array_free(scl_array* array) {
-    free(array->data);
-}
+#define SCL_ARRAY_GET(ARRAY, INDEX, TYPE) ({ \
+    TYPE __SCL_RETURN_DATA__; \
+    if(__scl_array_index_exists(ARRAY, INDEX)) { \
+	TYPE* __SCL_DATA__ = (TYPE*)ARRAY->data; \
+	__SCL_RETURN_DATA__ = __SCL_DATA__[INDEX]; \
+    } \
+    __SCL_RETURN_DATA__; \
+})
+
 #endif
