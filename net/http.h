@@ -39,9 +39,7 @@ typedef struct scl_http_request {
     int follow_redirects;
     void* data;
     size_t data_size;
-    char* basic_auth[2];
     scl_map* headers;
-    scl_map* params;
 } scl_http_request;
 
 typedef struct scl_http_response {

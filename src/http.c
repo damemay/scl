@@ -116,11 +116,21 @@ static int send_request(scl_http_request* r, int fd, char* host, char* query) {
     size += res, buffer += res;
     res = sprintf(buffer, "User-Agent: " SCL_HTTP_USER_AGENT SCL_HTTP_NEWLINE);
     size += res, buffer += res;
-    if(r->basic_auth[0]) {
-	printf("BASIC AUTH\n");
+    if(r->headers) {
+	for(size_t i=0; i<r->headers->size; i++) {
+	    scl_mitem* header = scl_map_get_by_index(r->headers, i);
+	    res = sprintf(buffer, "%s: %s" SCL_HTTP_NEWLINE, header->key, (char*)header->value);
+	    size += res, buffer += res;
+	}
     }
-    if(r->headers) {}
-    if(r->method != scl_http_request_head && r->data) {}
+    if(r->method != scl_http_request_head && r->data) {
+	res = sprintf(buffer, "Content-Length: %zu" SCL_HTTP_NEWLINE SCL_HTTP_NEWLINE, r->data_size);
+    	size += res, buffer += res;
+	memcpy(buffer, r->data, r->data_size);
+	size += r->data_size, buffer += r->data_size;
+	res += sprintf(buffer, SCL_HTTP_NEWLINE);
+	size += res, buffer += res;
+    }
     res += sprintf(buffer, SCL_HTTP_NEWLINE);
     size += res, buffer += res;
     if(!poll_event(fd, r->timeout, POLLOUT)) return scl_http_error_polling;
@@ -311,7 +321,7 @@ static int perform(scl_http_request* request, scl_http_response* response, int f
     return 0;
 }
 
-int scl_http_request_perform(scl_http_request* request, scl_http_response* response) {
+static int inner_perform(scl_http_request* request, scl_http_response* response) {
     int ret = 0;
     if((ret = init_request(request)) < 0) return ret;
     char hostname[SCL_HTTP_NAME_SIZE_LIMIT];
@@ -324,11 +334,39 @@ int scl_http_request_perform(scl_http_request* request, scl_http_response* respo
 	.port = port,
     };
     if(scl_socket_client_init(&sock) == -1) return -1;
-    if(request->params) {}
     response->data = NULL;
     response->data_size = 0;
     response->headers = NULL;
     response->status_code = 0;
     if((ret = perform(request, response, sock.fd, hostname, query)) < 0) return ret;
     return 0;
+}
+
+static void inner_free_response(scl_http_response* response) {
+    scl_map_free(response->headers);
+    free(response->data);
+}
+
+int scl_http_request_perform(scl_http_request* request, scl_http_response* response) {
+    if(request->follow_redirects) {
+	scl_http_response inner_response;
+	int redirect = 0;
+	int ret = 0;
+	do {
+	    if((ret = inner_perform(request, &inner_response)) < 0) return ret;
+	    if(inner_response.status_code >= 300 && inner_response.status_code <= 308) {
+		char* location = scl_map_get(inner_response.headers, "Location");
+		if(location) {
+		    redirect = 1;
+		    request->url = location;
+		}
+	    } else redirect = 0;
+	} while(redirect);
+	response->data = inner_response.data;
+    	response->data_size = inner_response.data_size;
+    	response->headers = inner_response.headers;
+    	response->status_code = inner_response.status_code;
+	return 0;
+    }
+    return inner_perform(request, response);
 }
