@@ -116,7 +116,9 @@ static int send_request(scl_http_request* r, int fd, char* host, char* query) {
     size += res, buffer += res;
     res = sprintf(buffer, "User-Agent: " SCL_HTTP_USER_AGENT SCL_HTTP_NEWLINE);
     size += res, buffer += res;
-    if(r->basic_auth[0]) {}
+    if(r->basic_auth[0]) {
+	printf("BASIC AUTH\n");
+    }
     if(r->headers) {}
     if(r->method != scl_http_request_head && r->data) {}
     res += sprintf(buffer, SCL_HTTP_NEWLINE);
@@ -251,8 +253,31 @@ static int concat_parse(scl_http_response* r, char* response) {
     return 0;
 }
 
+static int read_all_in_buf(scl_http_response* r, char* response) {
+    char* start = strstr(response, SCL_HTTP_TERMINATOR);
+    if(!start) return -1;
+    start += 4;
+    char* end = NULL;
+    int chunk_s = strtoul(start, &end, 16);
+    end += 2;
+    char* next = strstr(end, SCL_HTTP_NEWLINE);
+    int len = next-end;
+    if(chunk_s-len<=0) {
+	char* term = strstr(end, SCL_HTTP_TERMINATOR);
+	if(!term) return 0;
+	r->data_size = len+1;
+	r->data = malloc(r->data_size+1);
+	if(!r->data) return -1;
+	sprintf(r->data, "%.*s", len, end);
+	return 1;
+    }
+    return 0;
+}
+
 static int read_chunks(scl_http_response* r, int fd, int timeout, char* response) {
     int ret = 0;
+    if((ret = read_all_in_buf(r, response)) < 0) return ret;
+    else if(ret) return 0;
     r->data_size = SCL_HTTP_MESSAGE_SIZE_LIMIT*2;
     r->data = malloc(r->data_size);
     if(!r->data) return -1;

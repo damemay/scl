@@ -21,13 +21,13 @@ int main(int argc, char** argv) {
 	return 1;
     }
     
-    // printf("HTTP %d\n", response.status_code);
+     printf("HTTP %d\n", response.status_code);
     
-    // for(size_t i=0; i<response.headers->size; i++) {
-    //     scl_mitem* header = scl_map_get_by_index(response.headers, i);
-    //     printf("%s:%s\n", header->key, (char*)header->value);
-    // }
-    // 
+     for(size_t i=0; i<response.headers->size; i++) {
+         scl_mitem* header = scl_map_get_by_index(response.headers, i);
+         printf("%s:%s\n", header->key, (char*)header->value);
+     }
+     
     if(response.data) {
         printf("%.*s\n", (int)response.data_size, (char*)response.data);
     }
