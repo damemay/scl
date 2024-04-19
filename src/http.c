@@ -62,26 +62,12 @@ static void get_query(char* no_prefix_url, char* query) {
     else strcpy(query, "/");
 }
 
-static void* get_in_addr(struct sockaddr* sa) {
-    if(sa->sa_family == AF_INET) return &(((struct sockaddr_in*)sa)->sin_addr);
-    return &(((struct sockaddr_in6*)sa)->sin6_addr);
-}
-
-static int get_ip(char* hostname, char* ip) {
-    struct addrinfo* info;
-    if(getaddrinfo(hostname, NULL, NULL, &info) != 0) return scl_http_error_getaddrinfo;
-    inet_ntop(info->ai_family, get_in_addr(info->ai_addr), ip, SCL_HTTP_NAME_SIZE_LIMIT);
-    freeaddrinfo(info);
-    return 0;
-}
-
-static int parse_url(char* url, char* hostname, char* ip, char* port, char* query) {
+static int parse_url(char* url, char* hostname, char* port, char* query) {
     int has_prefix = get_port(url, port);
     char* test_url = has_prefix ? strstr(url, "//")+2 : url;
     get_hostname(test_url, hostname);
     get_query(test_url, query);
     int res = 0;
-    if((res = get_ip(hostname, ip)) < 0) return res;
     return 0;
 }
 
@@ -325,12 +311,11 @@ static int inner_perform(scl_http_request* request, scl_http_response* response)
     int ret = 0;
     if((ret = init_request(request)) < 0) return ret;
     char hostname[SCL_HTTP_NAME_SIZE_LIMIT];
-    char ip[SCL_HTTP_NAME_SIZE_LIMIT];
     char port[SCL_HTTP_PORT_SIZE_LIMIT];
     char query[SCL_HTTP_QUERY_SIZE_LIMIT];
-    parse_url(request->url, hostname, ip, port, query);
+    parse_url(request->url, hostname, port, query);
     scl_socket_client sock = {
-	.host = ip,
+	.host = hostname,
 	.port = port,
     };
     if(scl_socket_client_init(&sock) == -1) return -1;
