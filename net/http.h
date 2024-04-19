@@ -23,6 +23,7 @@ typedef enum scl_http_error {
     scl_http_error_send = -5,
     scl_http_error_recv = -6,
     scl_http_error_sock_closed = -7,
+    scl_http_error_str_not_found = -8,
 } scl_http_error;
 
 typedef enum scl_http_request_method {
@@ -45,6 +46,7 @@ typedef struct scl_http_request {
 
 typedef struct scl_http_response {
     void* data;
+    size_t data_size;
     uint16_t status_code;
     scl_map* headers;
 } scl_http_response;

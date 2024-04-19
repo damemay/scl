@@ -14,14 +14,14 @@ int main(int argc, char** argv) {
     };
     scl_http_response response;
     int ret = scl_http_request_perform(&request, &response);
-    if(ret > 0) {
+    if(ret < 0) {
 	char buf[1024];
 	scl_http_error_parse(ret, buf, 1024);
 	puts(buf);
 	return 1;
     }
     
-    printf("HTTP %d\n", response.status_code);
+    // printf("HTTP %d\n", response.status_code);
     
     // for(size_t i=0; i<response.headers->size; i++) {
     //     scl_mitem* header = scl_map_get_by_index(response.headers, i);
@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
     // }
     // 
     if(response.data) {
-        printf("%s\n", (char*)response.data);
+        printf("%.*s\n", (int)response.data_size, (char*)response.data);
     }
 
     return 0;

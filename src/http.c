@@ -1,6 +1,5 @@
 #include "../net/http.h"
 #include "../net/socket.h"
-#include "../utils/helpers.h"
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -16,6 +15,7 @@ void scl_http_error_parse(scl_http_error error, char* buffer, size_t size) {
 	case scl_http_error_send: snprintf(buffer, size, "send"); break;
 	case scl_http_error_recv: snprintf(buffer, size, "recv"); break;
 	case scl_http_error_sock_closed: snprintf(buffer, size, "sock closed"); break;
+	case scl_http_error_str_not_found: snprintf(buffer, size, "str not found"); break;
     }
 }
 
@@ -126,9 +126,8 @@ static int send_request(scl_http_request* r, int fd, char* host, char* query) {
     return 0;
 }
 
-static int recv_terminator(int fd, char* buffer, char* terminator, int timeout) {
+static int recv_terminator(int fd, char* buffer, char* terminator, uint16_t off, int timeout) {
     size_t b_off = 0;
-    uint16_t off = SCL_HTTP_QUERY_SIZE_LIMIT;
     fcntl(fd, F_SETFL, O_NONBLOCK);
     do {
 	if(poll_event(fd, timeout, POLLIN)) {
@@ -137,6 +136,8 @@ static int recv_terminator(int fd, char* buffer, char* terminator, int timeout) 
 	}
     } while(!strstr(buffer, terminator));
     buffer[b_off] = '\0';
+    const int flags = fcntl(fd, F_GETFL, 0);
+    fcntl(fd, F_SETFL, flags^O_NONBLOCK);
     return 0;
 }
 
@@ -184,6 +185,7 @@ static int data_with_content_length(scl_http_response* r, int fd, int timeout, c
     long content_length = atoi(size);
     r->data = malloc(content_length+1);
     if(!r->data) return -1;
+    r->data_size = content_length+1;
     char* data = strstr(response, SCL_HTTP_TERMINATOR)+4;
     strcpy(r->data, data);
     int remaining = content_length - strlen(data);
@@ -194,58 +196,85 @@ static int data_with_content_length(scl_http_response* r, int fd, int timeout, c
     return 0;
 }
 
-static int data_chunked(scl_http_response* r, int fd, int timeout, char* response) {
-    char* data = strstr(response, SCL_HTTP_TERMINATOR);
-    if(!data) return -1;
-    data += 2;
-    char* end = NULL;
-    unsigned long long chunk_size = strtoull(data, &end, 16);
-    if(chunk_size == 0) return 0;
-    SCL_VLOG("c:%llu", chunk_size);
-    void* tmp = realloc(r->data, chunk_size+10);
-    if(!tmp) return -1;
-    r->data = tmp;
-    int remaining = chunk_size - strlen(end+2);
-    SCL_VLOG("r:%d", remaining);
-    if(remaining <= 0) {
-        char* r_end = strstr(response, SCL_HTTP_CHUNK_TERMINATOR);
-        int len = r_end-(end+2);
-	char tmp[len];
-        sprintf(tmp, "%.*s", len, end+2);
-	strcat(r->data, tmp);
-        return 0;
+static int dyn_recv_terminator(scl_http_response* r, int fd, char* terminator, uint16_t off, int timeout) {
+    size_t pos = 0;
+    fcntl(fd, F_SETFL, O_NONBLOCK);
+    int i=0;
+    while(1) {
+	if(poll_event(fd, timeout, POLLIN)) {
+	    if(pos+off > r->data_size) {
+	    	void* tmp = realloc(r->data, r->data_size*2);
+	    	if(!tmp) return -1;
+	    	r->data = tmp;
+	    	r->data_size *= 2;
+	    }
+	    int recvd = recv(fd, r->data+pos, off, 0);
+	    if(recvd == 0) return scl_http_error_sock_closed;
+	    else if(recvd < 0) recvd = off;
+	    char* point = NULL;
+	    if((point = strstr(r->data+pos, SCL_HTTP_TERMINATOR))) {
+		pos += recvd;
+	        break;
+	    }
+	    pos += recvd;
+	}
     }
-    strcpy(r->data, end+2);
-    if(poll_event(fd, timeout, POLLIN))
-        if(scl_recv(fd, r->data+strlen(end+2), chunk_size) == 0)
-            return scl_http_error_sock_closed;
+    ((char*)(r->data))[pos] = '\0';
+    const int flags = fcntl(fd, F_GETFL, 0);
+    fcntl(fd, F_SETFL, flags^O_NONBLOCK);
     return 0;
-    //SCL_VLOG("%d", remaining);
-    //if(recv_terminator(fd, r->data+strlen(end+2), SCL_HTTP_NEWLINE, timeout) < 0) return -1;
-    //((char*)(r->data))[strlen(end+2)+remaining+9] = '\0';
-    //int ret = 0;
-    //if((ret = data_chunked(r, fd, timeout, r->data, SCL_HTTP_NEWLINE, size)) < 0)
-    //    return ret;
-    //return 0;
 }
 
-static void read_chunks(scl_http_response* r, int fd, int timeout) {
+static int concat_parse(scl_http_response* r, char* response) {
+    char* start = strstr(response, SCL_HTTP_TERMINATOR);
+    sprintf(r->data, "%s%s", start, (char*)r->data);
+    size_t size = strlen(r->data);
+    char* tmp = malloc(size);
+    if(!tmp) return -1;
+    char* t = r->data+4, *chunk_end = NULL, *next_t = NULL;
+    while(1) {
+	if(strtoul(t, &chunk_end, 16)) {
+	    next_t = strstr(chunk_end+2, SCL_HTTP_NEWLINE);
+	    chunk_end += 2;
+	    size_t len = next_t-chunk_end;
+	    if(len==0) break;
+	    char line[len+1];
+	    sprintf(line, "%.*s", (int)len, chunk_end);
+	    strcat(tmp, line);
+	    t = next_t+2;
+	    if(strtoul(t, NULL, 10) == 0) break;
+	}
+    }
+    free(r->data);
+    r->data = tmp;
+    r->data_size = size;
+    return 0;
+}
 
+static int read_chunks(scl_http_response* r, int fd, int timeout, char* response) {
+    int ret = 0;
+    r->data_size = SCL_HTTP_MESSAGE_SIZE_LIMIT*2;
+    r->data = malloc(r->data_size);
+    if(!r->data) return -1;
+    if((ret = dyn_recv_terminator(r, fd, SCL_HTTP_CHUNK_TERMINATOR, SCL_HTTP_QUERY_SIZE_LIMIT, timeout)) < 0) return ret;
+    concat_parse(r, response);
+    return 0;
 }
 
 static int read_response(scl_http_response* r, int fd, scl_http_request* req) {
     char response[SCL_HTTP_MESSAGE_SIZE_LIMIT];
     int ret = 0;
-    if((ret = recv_terminator(fd, response, SCL_HTTP_TERMINATOR, req->timeout)) < 0) return ret;
+    if((ret = recv_terminator(fd, response, SCL_HTTP_TERMINATOR, SCL_HTTP_QUERY_SIZE_LIMIT, req->timeout)) < 0) return ret;
     if((ret = parse_headers(r, response) < 0)) return ret;
     if(req->method != scl_http_request_head) {
 	char* value = NULL;
 	if((value = scl_map_get(r->headers, "Transfer-Encoding"))) {
-	    if((ret = data_chunked(r, fd, req->timeout, response)) < 0)
+	    if((ret = read_chunks(r, fd, req->timeout, response)) < 0)
     		return ret;
-	} else if((value = scl_map_get(r->headers, "Content-Length")))
+	} else if((value = scl_map_get(r->headers, "Content-Length"))) {
 	    if((ret = data_with_content_length(r, fd, req->timeout, value, response)) < 0)
 		return ret;
+	}
     }
     return 0;
 }
@@ -260,9 +289,6 @@ static int perform(scl_http_request* request, scl_http_response* response, int f
 int scl_http_request_perform(scl_http_request* request, scl_http_response* response) {
     int ret = 0;
     if((ret = init_request(request)) < 0) return ret;
-    response->data = NULL;
-    response->headers = NULL;
-    response->status_code = 0;
     char hostname[SCL_HTTP_NAME_SIZE_LIMIT];
     char ip[SCL_HTTP_NAME_SIZE_LIMIT];
     char port[SCL_HTTP_PORT_SIZE_LIMIT];
@@ -274,6 +300,10 @@ int scl_http_request_perform(scl_http_request* request, scl_http_response* respo
     };
     if(scl_socket_client_init(&sock) == -1) return -1;
     if(request->params) {}
+    response->data = NULL;
+    response->data_size = 0;
+    response->headers = NULL;
+    response->status_code = 0;
     if((ret = perform(request, response, sock.fd, hostname, query)) < 0) return ret;
     return 0;
 }
