@@ -10,6 +10,7 @@
 ### net
 
 - [socket.h](net/socket.h) - send and recv wrappers, client and server boilerplate
+- [http.h](net/http.h) - fast http client with simple api and headers parsing
 
 ### print
 
