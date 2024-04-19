@@ -318,7 +318,7 @@ static int inner_perform(scl_http_request* request, scl_http_response* response)
 	.host = hostname,
 	.port = port,
     };
-    if(scl_socket_client_init(&sock) == -1) return -1;
+    if(scl_socket_client_init(&sock) == -1) return scl_http_error_sock_closed;
     response->data = NULL;
     response->data_size = 0;
     response->headers = NULL;

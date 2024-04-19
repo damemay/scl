@@ -2,6 +2,7 @@
 #include <netdb.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <fcntl.h>
 
 int scl_send(int fd, const void* buf, const uint64_t size) {
     size_t total = 0, left = size, ret = 0;
@@ -114,10 +115,11 @@ static int connect_client(scl_socket_client* client) {
             continue;
         if(connect(client->fd, info->ai_addr, info->ai_addrlen) == -1) {
             close(client->fd);
-            return -1;
+	    continue;
         }
         break;
     }
+    if(!info) return -1;
     freeaddrinfo(info);
     return 0;
 }
