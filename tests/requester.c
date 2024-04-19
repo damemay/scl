@@ -15,9 +15,6 @@ int main(int argc, char** argv) {
         .url = argv[2],
         .method = method,
 	.follow_redirects = 1,
-	//.headers = headers,
-	//.data = "test",
-	//.data_size = 4,
     };
     scl_http_response response;
     int ret = scl_http_request_perform(&request, &response);

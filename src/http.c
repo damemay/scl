@@ -217,7 +217,7 @@ static int dyn_recv_terminator(scl_http_response* r, int fd, char* terminator, u
     while(1) {
 	if(poll_event(fd, timeout, POLLIN)) {
 	    if(pos+off > r->data_size) {
-	    	void* tmp = realloc(r->data, r->data_size*2);
+	    	void* tmp = realloc(r->data, r->data_size*2+1);
 	    	if(!tmp) return -1;
 	    	r->data = tmp;
 	    	r->data_size *= 2;
@@ -225,6 +225,7 @@ static int dyn_recv_terminator(scl_http_response* r, int fd, char* terminator, u
 	    int recvd = recv(fd, r->data+pos, off, 0);
 	    if(recvd == 0) return scl_http_error_sock_closed;
 	    else if(recvd < 0) recvd = off;
+	    ((char*)(r->data))[pos+recvd] = '\0';
 	    char* point = NULL;
 	    if((point = strstr(r->data+pos, SCL_HTTP_TERMINATOR))) {
 		pos += recvd;
@@ -242,9 +243,9 @@ static int dyn_recv_terminator(scl_http_response* r, int fd, char* terminator, u
 static int concat_parse(scl_http_response* r, char* response) {
     char* start = strstr(response, SCL_HTTP_TERMINATOR);
     sprintf(r->data, "%s%s", start, (char*)r->data);
-    size_t size = strlen(r->data);
-    char* tmp = malloc(r->data_size);
+    char* tmp = malloc(strlen(r->data)+1);
     if(!tmp) return -1;
+    char* buf = tmp;
     char* t = r->data+4, *chunk_end = NULL, *next_t = NULL;
     while(1) {
 	if(strtoul(t, &chunk_end, 16)) {
@@ -252,9 +253,7 @@ static int concat_parse(scl_http_response* r, char* response) {
 	    chunk_end += 2;
 	    size_t len = next_t-chunk_end;
 	    if(len==0) break;
-	    char line[len+1];
-	    sprintf(line, "%.*s", (int)len, chunk_end);
-	    strcat(tmp, line);
+	    buf += sprintf(buf, "%.*s", (int)len, chunk_end);
 	    t = next_t+2;
 	    if(strtoul(t, NULL, 10) == 0) break;
 	}
@@ -290,7 +289,7 @@ static int read_chunks(scl_http_response* r, int fd, int timeout, char* response
     if((ret = read_all_in_buf(r, response)) < 0) return ret;
     else if(ret) return 0;
     r->data_size = SCL_HTTP_MESSAGE_SIZE_LIMIT*2;
-    r->data = malloc(r->data_size);
+    r->data = malloc(r->data_size+1);
     if(!r->data) return -1;
     if((ret = dyn_recv_terminator(r, fd, SCL_HTTP_CHUNK_TERMINATOR, SCL_HTTP_QUERY_SIZE_LIMIT, timeout)) < 0) return ret;
     concat_parse(r, response);
