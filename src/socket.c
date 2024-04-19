@@ -108,6 +108,7 @@ static int connect_client(scl_socket_client* client) {
         .ai_socktype    = SOCK_STREAM,
     };
     struct addrinfo* info = init_addrinfo(client->host, client->port, &hints);
+    if(!info) return -1;
     for(client->ai = info; client->ai != NULL; client->ai = client->ai->ai_next) {
         if((client->fd = socket(info->ai_family, info->ai_socktype, info->ai_protocol)) == -1)
             continue;
@@ -117,8 +118,6 @@ static int connect_client(scl_socket_client* client) {
         }
         break;
     }
-    char rip[INET6_ADDRSTRLEN];
-    inet_ntop(info->ai_addr->sa_family, get_in_addr(info->ai_addr), rip, sizeof(rip));
     freeaddrinfo(info);
     return 0;
 }
