@@ -17,10 +17,6 @@ add_library(${PROJECT_NAME} STATIC
     ${scl_sources}
 )
 
-include_directories(${PROJECT_NAME}
-    ${OPENSSL_INCLUDE_DIR}
-)
-
 FILE(GLOB scl_test_sources tests/*.c)
 foreach(path ${scl_test_sources})
     string(REPLACE ".c" "" tmp ${path})
