@@ -57,3 +57,5 @@ tests/*
 !tests/*.*
 tests/*.dSYM
 libscl.a
+.cache
+compile_commands.json
