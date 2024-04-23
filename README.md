@@ -3,7 +3,7 @@
 ## goals
 - small, efficient, sanitized code with api for humans.
 - allocate on heap inside lib only when necessary.
-- learn and implement data structures, algorithms and other things of interest.
+- implement things of interest.
 
 ## contents
 
