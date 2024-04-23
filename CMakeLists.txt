@@ -17,8 +17,6 @@ add_library(${PROJECT_NAME} STATIC
     ${scl_sources}
 )
 
-find_package(OpenSSL REQUIRED)
-
 include_directories(${PROJECT_NAME}
     ${OPENSSL_INCLUDE_DIR}
 )
@@ -30,15 +28,11 @@ foreach(path ${scl_test_sources})
     add_executable(${name} ${path})
     if(CMAKE_BUILD_TYPE MATCHES "Debug")
         target_link_libraries(${name}
-	    OpenSSL::SSL
-	    OpenSSL::Crypto
             ${PROJECT_NAME}
             -fsanitize=address
         )
     else()
         target_link_libraries(${name}
-	    OpenSSL::SSL
-	    OpenSSL::Crypto
             ${PROJECT_NAME}
             -fsanitize=address
         )
