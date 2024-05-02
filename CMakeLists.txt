@@ -30,7 +30,6 @@ foreach(path ${scl_test_sources})
     else()
         target_link_libraries(${name}
             ${PROJECT_NAME}
-            -fsanitize=address
         )
     endif()
 endforeach()
