@@ -2,7 +2,7 @@
 #include "../utils/helpers.h"
 #include <string.h>
 
-static void scl_mitem_free(scl_mitem* item) {
+void scl_mitem_free(scl_mitem* item) {
     free(item->key);
     free(item->value);
     free(item);

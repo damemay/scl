@@ -14,6 +14,7 @@ int scl_map_add(scl_map* map, const char* key, const void* value, const size_t s
 int scl_map_del(scl_map* map, const char* key);
 void* scl_map_get(scl_map* map, const char* key);
 scl_mitem* scl_map_get_by_index(scl_map* map, const uint64_t index);
+void scl_mitem_free(scl_mitem* item);
 void scl_map_free(scl_map* map);
 
 #endif
