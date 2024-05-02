@@ -8,7 +8,7 @@ static void scl_mitem_free(scl_mitem* item) {
     free(item);
 }
 
-scl_map* scl_map_create(uint32_t capacity) {
+scl_map* scl_map_create(const uint64_t capacity) {
     scl_map* map = malloc(sizeof(scl_map));
     if(!map) return NULL;
     if(scl_array_init(map, capacity, sizeof(scl_mitem*)) == -1) {
@@ -18,7 +18,7 @@ scl_map* scl_map_create(uint32_t capacity) {
     return map;
 }
 
-int scl_map_add(scl_map* map, const char* key, const void* value, size_t size) {
+int scl_map_add(scl_map* map, const char* key, const void* value, const size_t size) {
     if(scl_map_get(map, key)) return -1;
     scl_mitem* item = malloc(sizeof(scl_mitem));
     if(!item) return -1;
@@ -62,7 +62,7 @@ void* scl_map_get(scl_map* map, const char* key) {
     return NULL;
 }
 
-scl_mitem* scl_map_get_by_index(scl_map* map, uint32_t index) {
+scl_mitem* scl_map_get_by_index(scl_map* map, const uint64_t index) {
     scl_mitem* item = SCL_ARRAY_GET(map, index, scl_mitem*);
     if(!item) return NULL;
     return item;

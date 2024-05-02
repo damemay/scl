@@ -1,7 +1,7 @@
 #include "../data/array.h"
 #include <stdint.h>
 
-int scl_array_init(scl_array* array, uint32_t capacity, size_t type_size) {
+int scl_array_init(scl_array* array, const uint64_t capacity, const size_t type_size) {
     array->capacity = capacity;
     array->step = capacity;
     array->size = 0;
@@ -11,7 +11,7 @@ int scl_array_init(scl_array* array, uint32_t capacity, size_t type_size) {
     return 0;
 }
 
-static int array_realloc(scl_array* array, uint32_t new_capacity) {
+static int array_realloc(scl_array* array, const uint64_t new_capacity) {
     void* data = realloc(array->data, new_capacity*array->type_size);
     if(!data) return -1;
     array->data = data;
@@ -26,7 +26,7 @@ int __scl_array_can_add(scl_array* array) {
     return 1;
 }
 
-int __scl_array_index_exists(scl_array* array, uint32_t index) {
+int __scl_array_index_exists(scl_array* array, const uint64_t index) {
     if(index >= array->size || index < 0) return 0;
     return 1;
 }

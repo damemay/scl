@@ -4,16 +4,16 @@
 #include <stdlib.h>
 
 typedef struct scl_array {
-    uint32_t capacity;
-    uint32_t size;
-    uint32_t step;
+    uint64_t capacity;
+    uint64_t size;
+    uint64_t step;
     size_t type_size;
     void* data;
 } scl_array;
 
-int scl_array_init(scl_array* array, uint32_t capacity, size_t type_size);
+int scl_array_init(scl_array* array, const uint64_t capacity, const size_t type_size);
 void scl_array_free(scl_array* array);
-int __scl_array_index_exists(scl_array* array, uint32_t index);
+int __scl_array_index_exists(scl_array* array, const uint64_t index);
 int __scl_array_can_add(scl_array* array);
 void __scl_array_del_realloc(scl_array* array);
 
