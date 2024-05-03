@@ -3,6 +3,10 @@
 #include <assert.h>
 #include <string.h>
 
+void print_hmap(scl_mitem* item, void* data) {
+    printf("%s:%s\n", item->key, (char*)item->value);
+}
+
 int main() {
     scl_hmap* hmap = scl_hmap_new();
     int res = scl_hmap_add(hmap, "first", "tes1", 5);
@@ -27,4 +31,5 @@ int main() {
     value = scl_hmap_get(hmap, "third");
     assert(value == NULL);
     SCL_LOG("third: not found");
+    scl_hmap_iterate(hmap, print_hmap, NULL);
 }

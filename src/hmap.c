@@ -75,10 +75,13 @@ int scl_hmap_del(scl_hmap* hmap, const char* key) {
     return -1;
 }
 
-scl_mitem* scl_hmap_get_by_index(scl_hmap* hmap, const uint64_t index) {
-    scl_mitem* item = SCL_ARRAY_GET(hmap, index, scl_mitem*);
-    if(!item) return NULL;
-    return item;
+void scl_hmap_iterate(scl_hmap* hmap, void (*func)(scl_mitem*, void*), void* user_data) {
+    scl_mitem** data = hmap->data;
+    for(size_t i=1; i<hmap->capacity; i++) {
+	scl_mitem* item = data[i];
+	if(!item) continue;
+	if(func) func(item, user_data);
+    }
 }
 
 void scl_hmap_free(scl_hmap* hmap) {
