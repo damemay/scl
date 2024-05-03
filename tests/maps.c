@@ -10,7 +10,7 @@ void print_map(scl_map* map) {
 }
 
 int main(int argc, char** argv) {
-    scl_map* map = scl_map_create(10);
+    scl_map* map = scl_map_new(10);
     int res = scl_map_add(map, "first", "test", 5);
     assert(res == 0);
     res = scl_map_add(map, "first", "test", 5);

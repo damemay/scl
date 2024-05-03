@@ -164,7 +164,7 @@ static void get_status_code_from_line(scl_http_response* r, char* line) {
 
 static int parse_headers(scl_http_response* r, char* response) {
     char* nl = response, *next_nl = response;
-    r->headers = scl_map_create(10);
+    r->headers = scl_map_new(10);
     if(!r->headers) return -1;
     while(1) {
 	next_nl = strstr(nl, SCL_HTTP_NEWLINE);

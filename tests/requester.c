@@ -8,7 +8,7 @@ int main(int argc, char** argv) {
     else if(strstr(argv[1], "post")) method = scl_http_request_post;
     else if(strstr(argv[1], "head")) method = scl_http_request_head;
 
-    scl_map* headers = scl_map_create(1);
+    scl_map* headers = scl_map_new(1);
     scl_map_add(headers, "Custom-header", "Boo", 3);
 
     scl_http_request request = {
