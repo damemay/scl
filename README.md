@@ -1,7 +1,7 @@
-# small c library
+# smol c library
 
 ## goals
-- small, efficient, sanitized code with api for humans
+- smol, efficient, fast and sanitized code with api for humans
 - implement basic things of interest for quick reusage in projects
 - public domain license
 
