@@ -3,6 +3,7 @@
 ## goals
 - smol, efficient, fast and sanitized code with api for humans
 - implement basic things of interest for quick reusage in projects
+- one header file, one source file
 - public domain license
 
 ## contents
