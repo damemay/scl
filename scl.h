@@ -25,4 +25,7 @@ int scl_dic_add(scl_dic* dict, const char* key, const void* value);
 void* scl_dic_get(scl_dic* dict, const char* key);
 void scl_dic_free(scl_dic* dict);
 
+char* scl_rd(const char* filepath, int nul_terminate, size_t* size);
+char** scl_rdl(const char* filepath, size_t* len);
+
 #endif
