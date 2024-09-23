@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include "scl.h"
 
-scl_arr* scl_arr_new(const size_t type_size) {
-    scl_arr* array = malloc(sizeof(scl_arr));
+sarr* sarr_new(const size_t type_size) {
+    sarr* array = malloc(sizeof(sarr));
     if(!array) return NULL;
     array->len = 0;
     array->cap = 16;
@@ -17,7 +17,7 @@ scl_arr* scl_arr_new(const size_t type_size) {
     return array;
 }
 
-int scl_arr_add(scl_arr* array, const void* element) {
+int sarr_add(sarr* array, const void* element) {
     if(array->len >= array->cap) {
 	size_t n_cap = array->cap * 2;
 	void** data = realloc(array->data, n_cap * sizeof(array->t_size));
@@ -29,18 +29,18 @@ int scl_arr_add(scl_arr* array, const void* element) {
     return 0;
 }
 
-void* scl_arr_get(scl_arr* array, size_t index) {
+void* sarr_get(sarr* array, size_t index) {
     if(index >= array->len || index < 0) return NULL;
     return array->data[index];
 }
 
-void scl_arr_free(scl_arr* array) {
+void sarr_free(sarr* array) {
     free(array->data);
     free(array);
 }
 
 static inline uint32_t yoshimura(const char *str, uint32_t len) {
-#define SCL_ROTL(x, n) (((x) << (n)) | ((x) >> (32-(n))))
+#define SDIC_ROTL(x, n) (((x) << (n)) | ((x) >> (32-(n))))
     const uint32_t p = 709607;
     uint32_t h0 = 2166136261, h1 = 2166136261;
     const char *c = str;
@@ -48,35 +48,35 @@ static inline uint32_t yoshimura(const char *str, uint32_t len) {
     if (len >= 2*2*sizeof(uint32_t)) {
         off = len-((len>>4)+1)*(2*4); i = (len>>4); i++;
         for(; i; i--, c += 2*sizeof(uint32_t)) {
-	    h0 = (h0 ^ (SCL_ROTL(*(uint32_t *)(c+0),5) ^ *(uint32_t *)(c+0+off))) * p;        
-	    h1 = (h1 ^ (SCL_ROTL(*(uint32_t *)(c+4+off),5) ^ *(uint32_t *)(c+4))) * p;        
+	    h0 = (h0 ^ (SDIC_ROTL(*(uint32_t *)(c+0),5) ^ *(uint32_t *)(c+0+off))) * p;        
+	    h1 = (h1 ^ (SDIC_ROTL(*(uint32_t *)(c+4+off),5) ^ *(uint32_t *)(c+4))) * p;        
         }
     } else {
-#define SIZE(U32T2, U32T1, U16T1, T1, N) (len & 2*sizeof(uint32_t)) ? U32T2 : (len & sizeof(uint32_t) ? U32T1 : (len & sizeof(uint16_t) ? U16T1 : (len & 1 ? T1 : N)))
-	h0 = SIZE((h0 ^ *(uint32_t*)(c+0)) * p, (h0 ^ *(uint16_t*)(c+0)) * p, (h0 ^ *(uint16_t*)c) * p, (h0 & *c) * p, h0);
-	h1 = SIZE((h1 ^ *(uint32_t*)(c+4)) * p, (h1 ^ *(uint16_t*)(c+2)) * p, h1, h1, h1);
-	c += SIZE(4*sizeof(uint16_t), 2*sizeof(uint16_t), sizeof(uint16_t), 0, 0);
+#define SDIC_SIZE(U32T2, U32T1, U16T1, T1, N) (len & 2*sizeof(uint32_t)) ? U32T2 : (len & sizeof(uint32_t) ? U32T1 : (len & sizeof(uint16_t) ? U16T1 : (len & 1 ? T1 : N)))
+	h0 = SDIC_SIZE((h0 ^ *(uint32_t*)(c+0)) * p, (h0 ^ *(uint16_t*)(c+0)) * p, (h0 ^ *(uint16_t*)c) * p, (h0 & *c) * p, h0);
+	h1 = SDIC_SIZE((h1 ^ *(uint32_t*)(c+4)) * p, (h1 ^ *(uint16_t*)(c+2)) * p, h1, h1, h1);
+	c += SDIC_SIZE(4*sizeof(uint16_t), 2*sizeof(uint16_t), sizeof(uint16_t), 0, 0);
     }
-    h0 = (h0 ^ SCL_ROTL(h1,5)) * p;
+    h0 = (h0 ^ SDIC_ROTL(h1,5)) * p;
     return h0 ^ (h0 >> 16);
-#undef SIZE
-#undef SCL_ROTL
+#undef SDIC_SIZE
+#undef SDIC_ROTL
 }
 
-scl_dic* scl_dic_new() {
-    scl_dic* dict = scl_arr_new(sizeof(struct scl_di*));
+sdic* sdic_new() {
+    sdic* dict = sarr_new(sizeof(struct sdic_i*));
     if(!dict) return NULL;
     return dict;
 }
 
-int scl_dic_add(scl_dic* dict, const char* key, const void* value) {
+int sdic_add(sdic* dict, const char* key, const void* value) {
     size_t key_len = strlen(key);
     uint32_t hash = yoshimura(key, key_len);
     for(size_t i=0; i<dict->len; i++) {
-	struct scl_di* it = (struct scl_di*)dict->data[i];
+	struct sdic_i* it = (struct sdic_i*)dict->data[i];
 	if(yoshimura(it->key, strlen(it->key)) == hash) return -1;
     }
-    struct scl_di* item = malloc(sizeof(struct scl_di));
+    struct sdic_i* item = malloc(sizeof(struct sdic_i));
     if(!item) return -1;
     item->key = malloc(key_len+1);
     if(!item->key) {
@@ -85,28 +85,28 @@ int scl_dic_add(scl_dic* dict, const char* key, const void* value) {
     }
     memcpy(item->key, key, key_len+1);
     item->value = (void*)value;
-    return scl_arr_add(dict, item);
+    return sarr_add(dict, item);
 }
 
-void* scl_dic_get(scl_dic* dict, const char* key) {
+void* sdic_get(sdic* dict, const char* key) {
     uint32_t hash = yoshimura(key, strlen(key));
     for(size_t i=0; i<dict->len; i++) {
-	struct scl_di* it = (struct scl_di*)dict->data[i];
+	struct sdic_i* it = (struct sdic_i*)dict->data[i];
 	if(yoshimura(it->key, strlen(it->key)) == hash) return it->value;
     }
     return NULL;
 }
 
-void scl_dic_free(scl_dic* dict) {
+void sdic_free(sdic* dict) {
     for(size_t i=0; i<dict->len; i++) {
-	struct scl_di* item = (struct scl_di*)dict->data[i];
+	struct sdic_i* item = (struct sdic_i*)dict->data[i];
 	free(item->key);
 	free(item);
     }
-    scl_arr_free(dict);
+    sarr_free(dict);
 }
 
-char* scl_rd(const char* filepath, int nul_terminate, size_t* size) {
+char* sread(const char* filepath, int nul_terminate, size_t* size) {
     FILE* file = fopen(filepath, "rb");
     if(!file) return NULL;
     fseek(file, 0L, SEEK_END);
@@ -130,9 +130,9 @@ char* scl_rd(const char* filepath, int nul_terminate, size_t* size) {
     return content;
 }
 
-char** scl_rdl(const char* filepath, size_t* len) {
+char** sreadlns(const char* filepath, size_t* len) {
     size_t size = 0;
-    char* content = scl_rd(filepath, 1, &size);
+    char* content = sread(filepath, 1, &size);
     if(!content) return NULL;
     char** array = malloc(size+1);
     if(!array) {
