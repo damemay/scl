@@ -7,10 +7,9 @@ typedef struct sarr {
     void** data;
     size_t cap;
     size_t len;
-    size_t t_size;
 } sarr;
 
-sarr* sarr_new(const size_t type_size);
+sarr* sarr_new();
 int sarr_add(sarr* array, const void* element);
 void* sarr_get(sarr* array, size_t index);
 void sarr_free(sarr* array);

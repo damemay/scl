@@ -3,13 +3,12 @@
 #include <stdio.h>
 #include "scl.h"
 
-sarr* sarr_new(const size_t type_size) {
+sarr* sarr_new() {
     sarr* array = malloc(sizeof(sarr));
     if(!array) return NULL;
     array->len = 0;
     array->cap = 16;
-    array->t_size = type_size;
-    array->data = calloc(16, sizeof(type_size));
+    array->data = calloc(16, sizeof(void*));
     if(!array->data) {
 	free(array);
 	return NULL;
@@ -20,7 +19,7 @@ sarr* sarr_new(const size_t type_size) {
 int sarr_add(sarr* array, const void* element) {
     if(array->len >= array->cap) {
 	size_t n_cap = array->cap * 2;
-	void** data = realloc(array->data, n_cap * sizeof(array->t_size));
+	void** data = realloc(array->data, n_cap * sizeof(void*));
 	if(!data) return -1;
 	array->data = data;
 	array->cap = n_cap;
@@ -64,7 +63,7 @@ static inline uint32_t yoshimura(const char *str, uint32_t len) {
 }
 
 sdic* sdic_new() {
-    sdic* dict = sarr_new(sizeof(struct sdic_i*));
+    sdic* dict = sarr_new();
     if(!dict) return NULL;
     return dict;
 }

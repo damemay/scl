@@ -3,23 +3,23 @@
 #include <assert.h>
 
 int main() {
-    scl_dic* dict = scl_dic_new();
-    int res = scl_dic_add(dict, "ABC", "String insertion");
+    sdic* dict = sdic_new();
+    int res = sdic_add(dict, "ABC", "String insertion");
     assert(res==0);
-    res = scl_dic_add(dict, "DEF", "Test string 2");
+    res = sdic_add(dict, "DEF", "Test string 2");
     assert(res==0);
-    res = scl_dic_add(dict, "GHIJKLMNO", "Yet another string inside dictionary");
+    res = sdic_add(dict, "GHIJKLMNO", "Yet another string inside dictionary");
     assert(res==0);
 
-    void* x = scl_dic_get(dict, "ABC");
+    void* x = sdic_get(dict, "ABC");
     assert(x);
     printf("%s\n", (char*)x);
-    x = scl_dic_get(dict, "DEF");
+    x = sdic_get(dict, "DEF");
     assert(x);
     printf("%s\n", (char*)x);
-    x = scl_dic_get(dict, "GHIJKLMNO");
+    x = sdic_get(dict, "GHIJKLMNO");
     assert(x);
     printf("%s\n", (char*)x);
 
-    scl_dic_free(dict);
+    sdic_free(dict);
 }
