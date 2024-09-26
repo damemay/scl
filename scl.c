@@ -4,11 +4,11 @@
 #include "scl.h"
 
 sarr* sarr_new() {
-    sarr* array = malloc(sizeof(sarr));
+    sarr* array = (sarr*)malloc(sizeof(sarr));
     if(!array) return NULL;
     array->len = 0;
     array->cap = 16;
-    array->data = calloc(16, sizeof(void*));
+    array->data = (void**)calloc(16, sizeof(void*));
     if(!array->data) {
 	free(array);
 	return NULL;
@@ -19,7 +19,7 @@ sarr* sarr_new() {
 int sarr_add(sarr* array, const void* element) {
     if(array->len >= array->cap) {
 	size_t n_cap = array->cap * 2;
-	void** data = realloc(array->data, n_cap * sizeof(void*));
+	void** data = (void**)realloc(array->data, n_cap * sizeof(void*));
 	if(!data) return -1;
 	array->data = data;
 	array->cap = n_cap;
@@ -75,9 +75,9 @@ int sdic_add(sdic* dict, const char* key, const void* value) {
 	struct sdic_i* it = (struct sdic_i*)dict->data[i];
 	if(yoshimura(it->key, strlen(it->key)) == hash) return -1;
     }
-    struct sdic_i* item = malloc(sizeof(struct sdic_i));
+    struct sdic_i* item = (struct sdic_i*)malloc(sizeof(struct sdic_i));
     if(!item) return -1;
-    item->key = malloc(key_len+1);
+    item->key = (char*)malloc(key_len+1);
     if(!item->key) {
 	free(item);
 	return -1;
@@ -114,7 +114,7 @@ char* sread(const char* filepath, int nul_terminate, size_t* size) {
     rewind(file);
     long m_size = f_size;
     if(nul_terminate) ++m_size;
-    char* content = malloc(m_size);
+    char* content = (char*)malloc(m_size);
     if(!content) {
         fclose(file);
 	return NULL;
@@ -133,7 +133,7 @@ char** sreadlns(const char* filepath, size_t* len) {
     size_t size = 0;
     char* content = sread(filepath, 1, &size);
     if(!content) return NULL;
-    char** array = malloc(size+1);
+    char** array = (char**)malloc(size+1);
     if(!array) {
 	free(content);
 	return NULL;
@@ -142,7 +142,7 @@ char** sreadlns(const char* filepath, size_t* len) {
     size_t i = 0;
     for(; line; i++) {
 	size_t l = strlen(line)+1;
-	array[i] = malloc(l);
+	array[i] = (char*)malloc(l);
 	memcpy(array[i], line, l);
         line = strtok(NULL, "\r\n");
     }
