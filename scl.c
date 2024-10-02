@@ -105,6 +105,41 @@ void sdic_free(sdic* dict) {
     sarr_free(dict);
 }
 
+sfnq* sfnq_new() {
+    sfnq* queue = sarr_new();
+    if(!queue) return NULL;
+    return queue;
+}
+
+int sfnq_add(sfnq* queue, void(*fn)(void*arg), void* arg) {
+    struct sfn* item = (struct sfn*)malloc(sizeof(struct sfn));
+    if(!item) return -1;
+    item->fn = fn;
+    item->arg = arg;
+    return sarr_add(queue, item);
+}
+
+void sfnq_fend(sfnq* queue) {
+    for(int i=queue->len-1; i>=0; i--) {
+	struct sfn* item = (struct sfn*)queue->data[i];
+	item->fn(item->arg);
+    }
+}
+
+void sfnq_fstart(sfnq* queue) {
+    for(size_t i=0; i<queue->len; i++) {
+	struct sfn* item = (struct sfn*)queue->data[i];
+	item->fn(item->arg);
+    }
+}
+
+void sfnq_free(sfnq* queue) {
+    for(size_t i=0; i<queue->len; i++) {
+	free(queue->data[i]);
+    }
+    sarr_free(queue);
+}
+
 char* sread(const char* filepath, int nul_terminate, size_t* size) {
     FILE* file = fopen(filepath, "rb");
     if(!file) return NULL;
