@@ -10,4 +10,5 @@
 
 - `sarr` - generic-type dynamic array
 - `sdic` - generic-type value dynamic dictionary with [yoshimura hash](http://www.sanmayce.com/Fastest_Hash/) and nul-terminated char* keys
+- `sfnq` - double-side queue accepting function pointers `void (*fn)(void* arg)`
 - `sread` and `sreadlns` - read file into char* (nul-terminated or not) or into char* array
