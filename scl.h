@@ -3,6 +3,10 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct sarr {
     void** data;
     size_t cap;
@@ -37,5 +41,9 @@ void sfnq_free(sfnq* queue);
 
 char* sread(const char* filepath, int nul_terminate, size_t* size);
 char** sreadlns(const char* filepath, size_t* len);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
