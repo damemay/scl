@@ -24,4 +24,4 @@ all of the structures above can be generated for non-pointer values with `SCL_ST
 
 ### utility functions
 - `sread` and `sreadlns` - read file into char* (nul-terminated or not) or into char* array
-- `smalloc`, `scalloc`, `sfree` - 
+- `smalloc`, `scalloc`, `sfree` - allocation wrappers for debugging (wrap in macro to use)
