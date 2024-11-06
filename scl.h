@@ -41,38 +41,38 @@ extern "C" {
 #include <string.h>
 #include <stdio.h>
 
-typedef struct sarr_ptr {
+typedef struct sarr {
   void** data;
   size_t len;
-} sarr_ptr;
+} sarr;
 
-sarr_ptr* sarr_ptr_new(const size_t len);
-void sarr_ptr_del(sarr_ptr* array);
+sarr* sarr_new(const size_t len);
+void sarr_del(sarr* array);
 
-typedef struct slist_ptr {
+typedef struct slist {
   void** data;
   size_t cap;
   size_t len;
-} slist_ptr;
+} slist;
 
-slist_ptr* slist_ptr_new(const size_t init_cap);
-int slist_ptr_add(slist_ptr* list, void* element);
-void slist_ptr_del(slist_ptr* list);
+slist* slist_new(const size_t init_cap);
+int slist_add(slist* list, void* element);
+void slist_del(slist* list);
 
-typedef struct shtable_ptr_item {
+typedef struct shtable_item {
   char* key;
   void* value;
-} shtable_ptr_item;
-typedef struct shtable_ptr {
-  shtable_ptr_item * data0;
-  shtable_ptr_item * data1;
+} shtable_item;
+typedef struct shtable {
+  shtable_item * data0;
+  shtable_item * data1;
   size_t len;
-} shtable_ptr;
+} shtable;
 
-shtable_ptr* shtable_ptr_new(const size_t init_len);
-int shtable_ptr_add(shtable_ptr* htable, const char* key, const void* value);
-int shtable_ptr_get(shtable_ptr* htable, const char* key, void** value);
-void shtable_ptr_del(shtable_ptr* htable);
+shtable* shtable_new(const size_t init_len);
+int shtable_add(shtable* htable, const char* key, const void* value);
+int shtable_get(shtable* htable, const char* key, void** value);
+void shtable_del(shtable* htable);
 
 char* sread(const char* filepath, int nul_terminate, size_t* size);
 char** sreadlns(const char* filepath, size_t* len);
@@ -242,8 +242,8 @@ void shtable_ ## type ## _del(shtable_ ## type * htable) { \
 #endif
 #ifdef SCL_IMPLEMENTATION
 
-sarr_ptr* sarr_ptr_new(const size_t len) {
-  sarr_ptr* array = (sarr_ptr*)malloc(sizeof(sarr_ptr));
+sarr* sarr_new(const size_t len) {
+  sarr* array = (sarr*)malloc(sizeof(sarr));
   if(!array) return NULL;
   array->len = len;
   array->data = (void**)calloc(len, sizeof(void*));
@@ -254,13 +254,13 @@ sarr_ptr* sarr_ptr_new(const size_t len) {
   return array;
 }
 
-void sarr_ptr_del(sarr_ptr* array) {
+void sarr_del(sarr* array) {
   free(array->data);
   free(array);
 }
 
-slist_ptr* slist_ptr_new(const size_t init_cap) {
-  slist_ptr* list = (slist_ptr*)malloc(sizeof(slist_ptr));
+slist* slist_new(const size_t init_cap) {
+  slist* list = (slist*)malloc(sizeof(slist));
   if(!list) return NULL;
   list->cap = init_cap;
   list->len = 0;
@@ -272,7 +272,7 @@ slist_ptr* slist_ptr_new(const size_t init_cap) {
   return list;
 }
 
-int slist_ptr_add(slist_ptr* list, void* element) {
+int slist_add(slist* list, void* element) {
   if(list->len >= list->cap) {
     size_t n_cap = list->cap * 2;
     void** data = (void**)realloc(list->data, n_cap * sizeof(void*));
@@ -284,7 +284,7 @@ int slist_ptr_add(slist_ptr* list, void* element) {
   return 1;
 }
 
-void slist_ptr_del(slist_ptr* list) {
+void slist_del(slist* list) {
   free(list->data);
   free(list);
 }
@@ -349,35 +349,35 @@ static inline uint32_t scl_yoshimura(const char *str, const uint32_t len) {
 #undef scl_ysize
 #undef scl_rotl
 
-shtable_ptr* shtable_ptr_new(const size_t init_len) {
-  shtable_ptr* htable = (shtable_ptr*)malloc(sizeof(shtable_ptr));
+shtable* shtable_new(const size_t init_len) {
+  shtable* htable = (shtable*)malloc(sizeof(shtable));
   if(!htable) return NULL;
   htable->len = init_len;
-  htable->data0 = (shtable_ptr_item*)calloc(init_len * 2, sizeof(shtable_ptr_item));
+  htable->data0 = (shtable_item*)calloc(init_len * 2, sizeof(shtable_item));
   if(!htable->data0) { free(htable); return NULL; }
   htable->data1 = htable->data0 + init_len;
   return htable;
 }
 
-static inline int shtable_ptr_resize(shtable_ptr* htable, const size_t len) {
+static inline int shtable_resize(shtable* htable, const size_t len) {
   if(len < htable->len) return 0;
-  shtable_ptr* nht = shtable_ptr_new(len);
+  shtable* nht = shtable_new(len);
   if(!nht) return 0;
   for(size_t i = 0; i < htable->len * 2; i++) if(htable->data0[i].key)
-    shtable_ptr_add(nht, htable->data0[i].key, htable->data0[i].value);
+    shtable_add(nht, htable->data0[i].key, htable->data0[i].value);
   size_t tl = htable->len;
   htable->len = len;
   nht->len = tl;
-  shtable_ptr_item* d = htable->data0;
+  shtable_item* d = htable->data0;
   htable->data0 = nht->data0;
   htable->data1 = nht->data1;
   nht->data0 = d;
-  shtable_ptr_del(nht);
+  shtable_del(nht);
   return 1;
 }
 
-int shtable_ptr_add(shtable_ptr* htable, const char* key, const void* value) {
-  if(shtable_ptr_get(htable, key, NULL)) return 0;
+int shtable_add(shtable* htable, const char* key, const void* value) {
+  if(shtable_get(htable, key, NULL)) return 0;
   const uint32_t len = strlen(key);
   const uint32_t y = scl_yoshimura(key, len);
   const uint32_t m = scl_murmurhash3x86(key, len, y);
@@ -397,11 +397,11 @@ int shtable_ptr_add(shtable_ptr* htable, const char* key, const void* value) {
       htable->data1[mi].value = (void*)value;
       return 1;
     }
-  if(!shtable_ptr_resize(htable, htable->len * 1.5)) return 0;
-  return shtable_ptr_add(htable, key, value);
+  if(!shtable_resize(htable, htable->len * 1.5)) return 0;
+  return shtable_add(htable, key, value);
 }
 
-int shtable_ptr_get(shtable_ptr* htable, const char* key, void** value) {
+int shtable_get(shtable* htable, const char* key, void** value) {
   if(!key) return 0;
   const uint32_t len = strlen(key);
   const uint32_t y = scl_yoshimura(key, len);
@@ -421,7 +421,7 @@ int shtable_ptr_get(shtable_ptr* htable, const char* key, void** value) {
   return 0;
 }
 
-void shtable_ptr_del(shtable_ptr* htable) {
+void shtable_del(shtable* htable) {
   for(size_t i = 0; i < htable->len * 2; i++)
     if(htable->data0[i].key) free(htable->data0[i].key);
   free(htable->data0);

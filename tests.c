@@ -22,8 +22,8 @@ int main() {
   sarr_int_del(arrint);
   fprintf(stderr, "sarr_: all assertions passed\n");
 
-  // sarr_ptr_
-  sarr_ptr* arrptr = sarr_ptr_new(10);
+  // sarr_
+  sarr* arrptr = sarr_new(10);
   assert(arrptr);
   assert(arrptr->data);
   assert(arrptr->len == 10);
@@ -34,8 +34,8 @@ int main() {
   }
   for(size_t i = 0; i < arrptr->len; i++) assert(*(int*)arrptr->data[i] == i);
   for(size_t i = 0; i < arrptr->len; i++) free(arrptr->data[i]);
-  sarr_ptr_del(arrptr);
-  fprintf(stderr, "sarr_ptr_: all assertions passed\n");
+  sarr_del(arrptr);
+  fprintf(stderr, "sarr_: all assertions passed\n");
 
   // slist_
   slist_int* listint = slist_int_new(16);
@@ -57,8 +57,8 @@ int main() {
   slist_int_del(listint);
   fprintf(stderr, "slist_: all assertions passed\n");
 
-  // slist_ptr_
-  slist_ptr* listptr = slist_ptr_new(16);
+  // slist_
+  slist* listptr = slist_new(16);
   assert(listptr);
   assert(listptr->cap == 16);
   assert(listptr->data);
@@ -66,7 +66,7 @@ int main() {
   for(size_t i = 0; i < 15; i++) {
     int* x = malloc(sizeof(int));
     *x = i;
-    assert(slist_ptr_add(listptr, x));
+    assert(slist_add(listptr, x));
   }
   assert(listptr->len == 15);
   assert(listptr->cap == 16);
@@ -74,21 +74,21 @@ int main() {
   {
     int* x = malloc(sizeof(int));
     *x = 15;
-    assert(slist_ptr_add(listptr, x));
+    assert(slist_add(listptr, x));
   }
   assert(listptr->len == 16);
   for(size_t i = 0; i < 16; i++) assert(*(int*)listptr->data[i] == i);
   {
     int* x = malloc(sizeof(int));
     *x = 16;
-    assert(slist_ptr_add(listptr, x));
+    assert(slist_add(listptr, x));
   }
   assert(listptr->len == 17);
   for(size_t i = 0; i < 17; i++) assert(*(int*)listptr->data[i] == i);
   assert(listptr->cap == 32);
   for(size_t i = 0; i < listptr->len; i++) free(listptr->data[i]);
-  slist_ptr_del(listptr);
-  fprintf(stderr, "slist_ptr_: all assertions passed\n");
+  slist_del(listptr);
+  fprintf(stderr, "slist_: all assertions passed\n");
 
   // shtable_
   shtable_int* htint = shtable_int_new(100);
@@ -128,18 +128,18 @@ int main() {
   shtable_int_del(htint);
   fprintf(stderr, "shtable_: all assertions passed\n");
 
-  // shtable_ptr_
-  shtable_ptr* htptr = shtable_ptr_new(100);
+  // shtable_
+  shtable* htptr = shtable_new(100);
   assert(htptr);
   assert(htptr->data0);
   assert(htptr->data1);
   assert(htptr->len == 100);
-  for(size_t i=0; i<100; i++) assert(shtable_ptr_add(htptr, words[i], words[i]));
+  for(size_t i=0; i<100; i++) assert(shtable_add(htptr, words[i], words[i]));
   for(size_t i=0; i<100;i++) {
     char* x = NULL;
-    shtable_ptr_get(htptr, words[i], (void**)&x);
+    shtable_get(htptr, words[i], (void**)&x);
     assert(x);
   }
-  shtable_ptr_del(htptr);
-  fprintf(stderr, "shtable_ptr_: all assertions passed\n");
+  shtable_del(htptr);
+  fprintf(stderr, "shtable_: all assertions passed\n");
 }

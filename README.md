@@ -13,9 +13,9 @@
 ## contents
 
 ### data structures
-- `sarr_ptr` - `void*` array
-- `slist_ptr` - `void*` dynamic list
-- `shtable_ptr` - `void*` dynamic hash table
+- `sarr` - `void*` array
+- `slist` - `void*` dynamic list
+- `shtable` - `void*` dynamic hash table
     - simplified implementation of cuckoo hashing (no loop)
     - hashed with [yoshimura](http://www.sanmayce.com/Fastest_Hash/) and [MurmurHash3](https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp)
     - uses nul-terminated char* keys
