@@ -23,5 +23,5 @@
 all of the structures above can be generated for non-pointer values with `SCL_STRUCTURE_DEFINE(type)` and `SCL_STRUCTURE_IMPLEMENT(type)` macros. Refer to [scl.h](scl.h) for guidance.
 
 ### utility functions
-- `sread` and `sreadlns` - read file into char* (nul-terminated or not) or into char* array
+- `sread` and `sreadlns` - read text/binary file into char* (nul-terminated or not) or into char* array
 - `smalloc`, `scalloc`, `sfree` - allocation wrappers for debugging (wrap in macro to use)

@@ -29,11 +29,19 @@
 // If you allocate a value and insert it into data structure as a pointer,
 // you're responsible for freeing it.
 //
+// sread/sreadlns: if you need to read file bigger than 2GB on a 32-bit device
+// and you're including <stdio.h> before scl.h,
+// compile your project/scl source file with -D_FILES_OFFSET_BITS=64.
+//
 
 #ifndef SMOL_C_LIBRARY
 #define SMOL_C_LIBRARY
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+#ifndef _FILE_OFFSET_BITS
+#define _FILE_OFFSET_BITS 64
 #endif
 
 #include <stdint.h>
@@ -456,7 +464,7 @@ char** sreadlns(const char* filepath, size_t* len) {
     size_t size = 0;
     char* content = sread(filepath, 1, &size);
     if(!content) return NULL;
-    char** array = (char**)malloc(size+1);
+    char** array = (char**)malloc((size+1)*sizeof(char*));
     if(!array) {
 	free(content);
 	return NULL;
