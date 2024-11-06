@@ -60,3 +60,4 @@ libscl.a
 .cache
 compile_commands.json
 a.out
+tests
