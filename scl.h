@@ -483,13 +483,13 @@ char** sreadlns(const char* filepath, size_t* len) {
 
 void* smalloc(size_t size, const char* file, int line, const char* fn) {
   void* p = malloc(size);
-  fprintf(stderr, "[smalloc] %p[%lu] %s:%u %s()\n", p, size, file, line, fn);
+  fprintf(stderr, "[smalloc] %p[%zu] %s:%u %s()\n", p, size, file, line, fn);
   return p;
 }
 
 void* scalloc(size_t n, size_t size, const char* file, int line, const char* fn) {
   void* p = calloc(n, size);
-  fprintf(stderr, "[smalloc] %p[%lu] %s:%u %s()\n", p, n*size, file, line, fn);
+  fprintf(stderr, "[smalloc] %p[%zu] %s:%u %s()\n", p, n*size, file, line, fn);
   return p;
 }
 
