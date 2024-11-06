@@ -29,8 +29,7 @@
 // If you allocate a value and insert it into data structure as a pointer,
 // you're responsible for freeing it.
 //
-// sread/sreadlns: if you need to read file bigger than 2GB on a 32-bit device
-// and you're including <stdio.h> before scl.h,
+// sread/sreadlns: if you need to read file bigger than 2GB on a 32-bit device,
 // compile your project/scl source file with -D_FILES_OFFSET_BITS=64.
 //
 
@@ -38,10 +37,6 @@
 #define SMOL_C_LIBRARY
 #ifdef __cplusplus
 extern "C" {
-#endif
-
-#ifndef _FILE_OFFSET_BITS
-#define _FILE_OFFSET_BITS 64
 #endif
 
 #include <stdint.h>
